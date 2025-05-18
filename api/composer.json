@@ -1,0 +1,9 @@
+{
+    "name": "earthdog/fs-tours-api",
+    "description": "api for fs-tours",
+    "require": {
+        "slim/slim": "^4.14",
+        "slim/psr7": "^1.7",
+        "tiagohillebrandt/aerofetch": "^1.4"
+    }
+}
