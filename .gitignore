@@ -9,6 +9,23 @@
 /api/database/*.sqlite
 !/api/database/.gitkeep
 
+# DDEV related
+/api/.ddev/.dbimageBuild
+/api/.ddev/.dbimageExtra
+/api/.ddev/.ddev-docker-compose-base.yaml
+/api/.ddev/.ddev-docker-compose-full.yaml
+/api/.ddev/.global_commands
+/api/.ddev/commands
+/api/.ddev/docker-compose.*.yaml
+/api/.ddev/db_snapshots
+/api/.ddev/import-db
+/api/.ddev/import-files
+/api/.ddev/homeadditions
+/api/.ddev/traefik
+/api/.ddev/*.example
+/api/.ddev/mutagen
+/api/.ddev/sequelpro.spf
+
 # Frontend (Vue/Quasar) related
 /frontend/.quasar/
 /frontend/node_modules/
