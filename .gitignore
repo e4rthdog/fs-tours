@@ -1,0 +1,43 @@
+# API (PHP) related
+/api/vendor/
+/api/composer.lock
+/api/.env
+/api/logs/*
+!/api/logs/.gitkeep
+/api/cache/*
+!/api/cache/.gitkeep
+/api/database/*.sqlite
+!/api/database/.gitkeep
+
+# Frontend (Vue/Quasar) related
+/frontend/.quasar/
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# IDE / Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
