@@ -6,8 +6,9 @@
 !/api/logs/.gitkeep
 /api/cache/*
 !/api/cache/.gitkeep
-/api/database/*.sqlite
-!/api/database/.gitkeep
+/api/db/*.sqlite
+/api/db/*.db
+!/api/db/.gitkeep
 
 # DDEV related
 /api/.ddev/.dbimageBuild
