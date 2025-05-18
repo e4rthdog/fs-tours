@@ -36,6 +36,7 @@
 
 - The application is a personal Flight Simulator tour viewer. Flights are part of a tour and for each flight certain information is kept.
 - The main page of the application is a world map. The map shows one or more selected tours. Each tour has a certain color on the map.
-- Each leg has information assigned to it (origin,destination,route,route details, links to medis e.t.c).
-- There is an option for the user to enter a new leg (protected by password).
+- Each leg has information assigned to it (tour-id,origin,destination,route,aircraft type,link,comments).
+- Form for the user to enter a new tour (tourid, tour-description) (protected by password).
+- Form for the user to enter a new leg (protected by password).
 - There will be an option the user to delete or edit the leg data (protected by password).
