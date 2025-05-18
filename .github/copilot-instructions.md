@@ -22,6 +22,7 @@
 ## API specific instructions
 
 - The api will use PHP and especially it will utilize the SLIM framework along with the MEDOO.
+- PHP Library https://github.com/tiagohillebrandt/aerofetch will be used to get aircraft and airport data.
 
 ## Frontend specific instructions
 
