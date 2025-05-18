@@ -4,6 +4,7 @@
     "require": {
         "slim/slim": "^4.14",
         "slim/psr7": "^1.7",
-        "tiagohillebrandt/aerofetch": "^1.4"
+        "tiagohillebrandt/aerofetch": "^1.4",
+        "catfan/medoo": "^2.2"
     }
 }
