@@ -4,7 +4,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 use Medoo\Medoo;
-use Tiagohillebrandt\AeroFetch\AeroFetch;
+use THSCD\AeroFetch\Services\AirportService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -13,8 +13,41 @@ $database = new Medoo([
     'database' => __DIR__ . '/../db/fstours.db'
 ]);
 
-// Initialize AeroFetch
-$aeroFetch = new AeroFetch();
+// Helper function to enrich leg data with coordinates and aircraft info
+function enrichLegData($legData) {
+    if (empty($legData)) {
+        return $legData;
+    }
+
+    // Process single leg
+    if (isset($legData['origin'])) {
+        $originAirport = AirportService::getBy('icaoCode',$legData['origin']);
+        $destAirport = AirportService::getBy('icaoCode',$legData['destination']);
+
+        $originAirportObj = (is_array($originAirport) && !empty($originAirport)) ? reset($originAirport) : null;
+        $destAirportObj = (is_array($destAirport) && !empty($destAirport)) ? reset($destAirport) : null;
+        // TODO: Implement aircraft lookup if needed
+
+        if (is_object($originAirportObj) && !is_null($originAirportObj->latitude) && !is_null($originAirportObj->longitude)) {
+            $legData['origin_coords'] = [(float)$originAirportObj->latitude, (float)$originAirportObj->longitude];
+        }
+
+        if (is_object($destAirportObj) && !is_null($destAirportObj->latitude) && !is_null($destAirportObj->longitude)) {
+            $legData['destination_coords'] = [(float)$destAirportObj->latitude, (float)$destAirportObj->longitude];
+        }
+
+        // $legData['aircraft_name'] = ... // implement if you have aircraft data
+
+        return $legData;
+    }
+
+    // Process multiple legs
+    foreach ($legData as &$leg) {
+        $leg = enrichLegData($leg);
+    }
+
+    return $legData;
+}
 
 $app = AppFactory::create();
 
@@ -51,8 +84,6 @@ $app->get('/tours[/{id}]', function (Request $request, Response $response, $args
 // Get all tour legs or a specific one by id
 $app->get('/legs[/{id}]', function (Request $request, Response $response, $args) use ($database) {
     $id = $args['id'] ?? null;
-    
-    // Join with tours table to get tour-description
     $legData = $database->select('tour-legs', [
         '[>]tours' => ['tour-id' => 'tour-id']
     ], [
@@ -68,15 +99,16 @@ $app->get('/legs[/{id}]', function (Request $request, Response $response, $args)
         'tour-legs.link3',
         'tours.tour-description'
     ], $id ? ['tour-legs.id' => $id] : []);
-    
+
     if ($id && empty($legData)) {
         $response->getBody()->write(json_encode(['error' => 'Tour leg not found']));
         return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
     }
-    
+
     $result = $id ? ($legData[0] ?? null) : $legData;
-    
-    $response->getBody()->write(json_encode($result));
+    $enrichedResult = enrichLegData($result);
+
+    $response->getBody()->write(json_encode($enrichedResult));
     return $response->withHeader('Content-Type', 'application/json');
 });
 
