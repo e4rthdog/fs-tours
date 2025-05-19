@@ -55,6 +55,15 @@ function enrichLegData($legData) {
 
 $app = AppFactory::create();
 
+// Add CORS headers to all routes
+$app->add(function ($request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+});
+
 $app->get('/', function (Request $request, Response $response, $args) {
     $response->getBody()->write("Welcome to fs-tours API. Why are you here in this emptiness?");
     return $response;
