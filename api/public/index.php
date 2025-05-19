@@ -24,12 +24,10 @@ function enrichLegData($legData) {
     if (isset($legData['origin'])) {
         $originAirport = AirportService::getBy('icaoCode',$legData['origin']);
         $destAirport = AirportService::getBy('icaoCode',$legData['destination']);
-
         $aircraft = AircraftService::getBy('icaoCode', $legData['aircraft']);
 
         $originAirportObj = (is_array($originAirport) && !empty($originAirport)) ? reset($originAirport) : null;
         $destAirportObj = (is_array($destAirport) && !empty($destAirport)) ? reset($destAirport) : null;
-
         $aircraftObj = (is_array($aircraft) && !empty($aircraft)) ? reset($aircraft) : null;
 
         if (is_object($originAirportObj) && !is_null($originAirportObj->latitude) && !is_null($originAirportObj->longitude)) {
