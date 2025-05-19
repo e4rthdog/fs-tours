@@ -1,0 +1,61 @@
+# API (PHP) related
+/api/vendor/
+/api/composer.lock
+/api/.env
+/api/logs/*
+!/api/logs/.gitkeep
+/api/cache/*
+!/api/cache/.gitkeep
+/api/db/*.sqlite
+/api/db/*.db
+!/api/db/.gitkeep
+
+# DDEV related
+/api/.ddev/.dbimageBuild
+/api/.ddev/.dbimageExtra
+/api/.ddev/.ddev-docker-compose-base.yaml
+/api/.ddev/.ddev-docker-compose-full.yaml
+/api/.ddev/.global_commands
+/api/.ddev/commands
+/api/.ddev/docker-compose.*.yaml
+/api/.ddev/db_snapshots
+/api/.ddev/import-db
+/api/.ddev/import-files
+/api/.ddev/homeadditions
+/api/.ddev/traefik
+/api/.ddev/*.example
+/api/.ddev/mutagen
+/api/.ddev/sequelpro.spf
+
+# Frontend (Vue/Quasar) related
+/frontend/.quasar/
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# IDE / Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
