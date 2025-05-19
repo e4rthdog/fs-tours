@@ -5,6 +5,7 @@ use Slim\Factory\AppFactory;
 
 use Medoo\Medoo;
 use THSCD\AeroFetch\Services\AirportService;
+use THSCD\AeroFetch\Services\AircraftService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -24,9 +25,12 @@ function enrichLegData($legData) {
         $originAirport = AirportService::getBy('icaoCode',$legData['origin']);
         $destAirport = AirportService::getBy('icaoCode',$legData['destination']);
 
+        $aircraft = AircraftService::getBy('icaoCode', $legData['aircraft']);
+
         $originAirportObj = (is_array($originAirport) && !empty($originAirport)) ? reset($originAirport) : null;
         $destAirportObj = (is_array($destAirport) && !empty($destAirport)) ? reset($destAirport) : null;
-        // TODO: Implement aircraft lookup if needed
+
+        $aircraftObj = (is_array($aircraft) && !empty($aircraft)) ? reset($aircraft) : null;
 
         if (is_object($originAirportObj) && !is_null($originAirportObj->latitude) && !is_null($originAirportObj->longitude)) {
             $legData['origin_coords'] = [(float)$originAirportObj->latitude, (float)$originAirportObj->longitude];
@@ -36,7 +40,9 @@ function enrichLegData($legData) {
             $legData['destination_coords'] = [(float)$destAirportObj->latitude, (float)$destAirportObj->longitude];
         }
 
-        // $legData['aircraft_name'] = ... // implement if you have aircraft data
+        if (is_object($aircraftObj) && !is_null($aircraftObj->model)) {
+            $legData['aircraft_model'] = $aircraftObj->model;
+        }
 
         return $legData;
     }
