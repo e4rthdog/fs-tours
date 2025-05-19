@@ -4,6 +4,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 use Medoo\Medoo;
+use Tiagohillebrandt\AeroFetch\AeroFetch;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -11,6 +12,9 @@ $database = new Medoo([
     'type' => 'sqlite',
     'database' => __DIR__ . '/../db/fstours.db'
 ]);
+
+// Initialize AeroFetch
+$aeroFetch = new AeroFetch();
 
 $app = AppFactory::create();
 
