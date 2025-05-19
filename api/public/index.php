@@ -69,6 +69,8 @@ $app->get('/', function (Request $request, Response $response, $args) {
     return $response;
 });
 
+//
+// TOURS CODE
 // Get all tours or a specific one by tour-id
 $app->get('/tours[/{id}]', function (Request $request, Response $response, $args) use ($database) {
     $id = $args['id'] ?? null;
@@ -94,6 +96,88 @@ $app->get('/tours[/{id}]', function (Request $request, Response $response, $args
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+// Create a new tour
+$app->post('/tours', function (Request $request, Response $response, $args) use ($database) {
+    $data = $request->getParsedBody();
+    
+    // Validate required fields
+    if (empty($data['tour-id']) || empty($data['tour-description'])) {
+        $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+    
+    // Check if tour with same ID already exists
+    $existing = $database->get('tours', ['tour-id'], ['tour-id' => $data['tour-id']]);
+    if ($existing) {
+        $response->getBody()->write(json_encode(['error' => 'Tour with this ID already exists']));
+        return $response->withStatus(409)->withHeader('Content-Type', 'application/json');
+    }
+    
+    $database->insert('tours', [
+        'tour-id' => $data['tour-id'],
+        'tour-description' => $data['tour-description']
+    ]);
+    
+    $response->getBody()->write(json_encode(['success' => true, 'tour-id' => $data['tour-id']]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+// Update an existing tour
+$app->put('/tours/{id}', function (Request $request, Response $response, $args) use ($database) {
+    $id = $args['id'];
+    $data = $request->getParsedBody();
+    
+    // Validate required fields
+    if (empty($data['tour-description'])) {
+        $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+    
+    // Check if tour exists
+    $existing = $database->get('tours', ['tour-id'], ['tour-id' => $id]);
+    if (!$existing) {
+        $response->getBody()->write(json_encode(['error' => 'Tour not found']));
+        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+    }
+    
+    $database->update('tours', [
+        'tour-description' => $data['tour-description']
+    ], [
+        'tour-id' => $id
+    ]);
+    
+    $response->getBody()->write(json_encode(['success' => true]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+// Delete a tour
+$app->delete('/tours/{id}', function (Request $request, Response $response, $args) use ($database) {
+    $id = $args['id'];
+    
+    // Check if tour exists
+    $existing = $database->get('tours', ['tour-id'], ['tour-id' => $id]);
+    if (!$existing) {
+        $response->getBody()->write(json_encode(['error' => 'Tour not found']));
+        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+    }
+    
+    // Check for legs associated with this tour
+    $legs = $database->has('tour-legs', ['tour-id' => $id]);
+    if ($legs) {
+        $response->getBody()->write(json_encode([
+            'error' => 'Cannot delete tour with existing legs. Delete the legs first.'
+        ]));
+        return $response->withStatus(409)->withHeader('Content-Type', 'application/json');
+    }
+    
+    $database->delete('tours', ['tour-id' => $id]);
+    
+    $response->getBody()->write(json_encode(['success' => true]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+//
+// LEGS CODE
 // Get all tour legs or a specific one by id
 $app->get('/legs[/{id}]', function (Request $request, Response $response, $args) use ($database) {
     $id = $args['id'] ?? null;
