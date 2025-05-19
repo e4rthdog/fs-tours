@@ -64,6 +64,20 @@ $app->add(function ($request, $handler) {
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 });
 
+// Authentication middleware
+$authMiddleware = function ($request, $handler) {
+    $auth = $request->getHeaderLine('Authorization');
+    if (empty($auth) || $auth !== 'Bearer your-secret-token') {
+        $response = new \Slim\Psr7\Response();
+        $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
+        return $response
+            ->withStatus(401)
+            ->withHeader('Content-Type', 'application/json');
+    }
+    
+    return $handler->handle($request);
+};
+
 $app->get('/', function (Request $request, Response $response, $args) {
     $response->getBody()->write("Welcome to fs-tours API. Why are you here in this emptiness?");
     return $response;
