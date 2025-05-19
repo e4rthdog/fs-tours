@@ -23,5 +23,5 @@
 </template>
 
 <script setup>
-//
+// No extra logic needed
 </script>
