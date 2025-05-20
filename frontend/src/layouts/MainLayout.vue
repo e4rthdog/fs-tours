@@ -30,7 +30,5 @@
 </script>
 
 <style scoped>
-.bg-dark {
-  background: #181c20;
-}
+
 </style>
