@@ -35,7 +35,27 @@
         >
           <LPopup>
             <div class="q-pa-sm">
-              <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
+              <div class="flex items-center justify-between">
+                <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
+                <div class="q-gutter-x-sm">
+                  <q-btn
+                    square
+                    glossy
+                    size="xs"
+                    color="secondary"
+                    icon="edit"
+                    style="border: 1px solid #f2c037"
+                  />
+                  <q-btn
+                    square
+                    glossy
+                    size="xs"
+                    color="negative"
+                    icon="delete"
+                    style="border: 1px solid #c10015"
+                  />
+                </div>
+              </div>
               <q-separator class="q-my-xs" />
               <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
               <div><strong>Leg:</strong> {{ leg.sequence }}</div>
@@ -47,14 +67,13 @@
               <div v-if="leg.flight_date">
                 <strong>Date:</strong> {{ formatDate(leg.flight_date) }}
               </div>
-              
+
               <!-- Link buttons -->
               <div class="q-mt-sm q-gutter-sm row">
                 <q-btn
                   v-if="leg.link1"
                   size="sm"
-                  color="secondary"
-                  flat
+                  color="warning"
                   icon="launch"
                   :href="leg.link1"
                   target="_blank"
@@ -64,8 +83,7 @@
                 <q-btn
                   v-if="leg.link2"
                   size="sm"
-                  color="secondary"
-                  flat
+                  color="warning"
                   icon="launch"
                   :href="leg.link2"
                   target="_blank"
@@ -75,8 +93,7 @@
                 <q-btn
                   v-if="leg.link3"
                   size="sm"
-                  color="secondary"
-                  flat
+                  color="warning"
                   icon="launch"
                   :href="leg.link3"
                   target="_blank"
