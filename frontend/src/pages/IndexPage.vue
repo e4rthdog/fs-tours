@@ -58,7 +58,6 @@
                   />
                 </div>
               </div>
-              <q-separator class="q-my-xs" />
 
               <q-table
                 class="leg-info-table"
@@ -330,6 +329,7 @@ watch(
   padding: 4px 8px;
   height: auto;
   color: white;
+  border-style: none;
 }
 
 .leg-info-table .q-table__card {
