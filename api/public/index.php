@@ -192,6 +192,40 @@ $app->delete('/tours/{id}', function (Request $request, Response $response, $arg
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+
+// Get all legs for a specific tour
+$app->get('/tours/{id}/legs', function (Request $request, Response $response, $args) use ($database) {
+    $tourId = $args['id'];
+    $legs = $database->select('tour_legs', [
+        'id',
+        'tour_id',
+        'origin',
+        'destination',
+        'aircraft',
+        'route',
+        'comments',
+        'flight_date',
+        'link1',
+        'link2',
+        'link3'
+    ], [
+        'tour_id' => $tourId,
+        'ORDER' => ['flight_date' => 'ASC', 'id' => 'ASC']
+    ]);
+
+    // Assign sequence numbers
+    $seq = 1;
+    foreach ($legs as &$leg) {
+        $leg['sequence'] = $seq++;
+    }
+
+    $enrichedLegs = enrichLegData($legs);
+
+    $response->getBody()->write(json_encode($enrichedLegs));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+
 //
 // LEGS CODE
 // Get all tour legs or a specific one by id
