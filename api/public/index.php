@@ -197,20 +197,23 @@ $app->delete('/tours/{id}', function (Request $request, Response $response, $arg
 $app->get('/tours/{id}/legs', function (Request $request, Response $response, $args) use ($database) {
     $tourId = $args['id'];
     $legs = $database->select('tour_legs', [
-        'id',
-        'tour_id',
-        'origin',
-        'destination',
-        'aircraft',
-        'route',
-        'comments',
-        'flight_date',
-        'link1',
-        'link2',
-        'link3'
+        '[>]tours' => ['tour_id' => 'tour_id']
     ], [
-        'tour_id' => $tourId,
-        'ORDER' => ['flight_date' => 'ASC', 'id' => 'ASC']
+        'tour_legs.id',
+        'tour_legs.tour_id',
+        'tour_legs.origin',
+        'tour_legs.destination',
+        'tour_legs.aircraft',
+        'tour_legs.route',
+        'tour_legs.comments',
+        'tour_legs.flight_date',
+        'tour_legs.link1',
+        'tour_legs.link2',
+        'tour_legs.link3',
+        'tours.tour_description'
+    ], [
+        'tour_legs.tour_id' => $tourId,
+        'ORDER' => ['tour_legs.flight_date' => 'ASC', 'tour_legs.id' => 'ASC']
     ]);
 
     // Assign sequence numbers
