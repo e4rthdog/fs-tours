@@ -35,11 +35,10 @@
         >
           <LPopup>
             <div class="q-pa-sm">
-              <div class="text-h6">{{ leg.origin }}</div>
+              <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
               <q-separator class="q-my-xs" />
               <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
               <div><strong>Leg:</strong> {{ leg.sequence }}</div>
-              <div><strong>To:</strong> {{ leg.destination }}</div>
               <div v-if="leg.aircraft_model">
                 <strong>Aircraft:</strong> {{ leg.aircraft_model }}
               </div>
@@ -112,7 +111,7 @@ const formatDate = (dateString) => {
 
   try {
     const date = new Date(dateString)
-    return date.toLocaleDateString()
+    return date.toLocaleDateString('el')
   } catch {
     return dateString
   }
