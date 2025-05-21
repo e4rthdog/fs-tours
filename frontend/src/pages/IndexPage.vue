@@ -166,7 +166,7 @@ const numberedIcon = (number) =>
   L.divIcon({
     className: 'custom-marker',
     html: `<div class="marker-number">${number}</div>`,
-    iconSize: [30, 30],
+    iconSize: [25, 25],
     iconAnchor: [15, 15],
   })
 
@@ -174,8 +174,8 @@ const emptyIcon = () =>
   L.divIcon({
     className: 'custom-marker destination-marker',
     html: `<div class="marker-number"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [25, 25],
+    iconAnchor: [15, 15],
   })
 
 const onLegClick = (leg, index) => {
@@ -221,6 +221,7 @@ watch(
 <style>
 .custom-marker {
   display: flex;
+  background-color: #1f6eb8; /* Accent color */
   align-items: center;
   justify-content: center;
   color: #fff;
@@ -234,8 +235,7 @@ watch(
 }
 
 .destination-marker {
-  width: 20px;
-  height: 20px;
+  background-color: #1f6eb8; /* Accent color */
 }
 
 .marker-number {
