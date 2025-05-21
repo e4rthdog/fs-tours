@@ -2,12 +2,10 @@
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-dark text-white">
       <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar size="32px" class="q-mr-sm">
-            <img src="https://i.imgur.com/4M34hi2.png" alt="Logo" />
-          </q-avatar>
-          FS Tours
-        </q-toolbar-title>
+        <q-avatar size="32px" class="q-mr-md">
+          <img src="https://i.imgur.com/4M34hi2.png" alt="Logo" />
+        </q-avatar>
+        <q-toolbar-title shrink class="q-mx-lg">FS Tours</q-toolbar-title>
         <q-select
           v-model="selectedTour"
           :options="tourOptions"
@@ -16,11 +14,9 @@
           label="Select Tour"
           dense
           outlined
-          class="q-ml-md"
           style="min-width: 200px"
           :loading="store.loading"
           @update:model-value="onTourSelected"
-          clearable
           emit-value
           map-options
         >
