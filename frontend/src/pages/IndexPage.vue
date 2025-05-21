@@ -42,9 +42,9 @@
         </LMarker>
 
         <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
-        <LMarker 
-          v-if="!isLocationAnOrigin(leg.destination_coords, index)" 
-          :lat-lng="leg.destination_coords" 
+        <LMarker
+          v-if="!isLocationAnOrigin(leg.destination_coords, index)"
+          :lat-lng="leg.destination_coords"
           :icon="emptyIcon()"
         >
           <LPopup>
@@ -143,10 +143,11 @@ const selectedLegIndex = ref(-1)
 
 // Function to check if a location is an origin in any leg
 const isLocationAnOrigin = (coords, currentIndex) => {
-  return store.legs.some((leg, idx) => 
-    idx !== currentIndex && 
-    leg.origin_coords[0] === coords[0] && 
-    leg.origin_coords[1] === coords[1]
+  return store.legs.some(
+    (leg, idx) =>
+      idx !== currentIndex &&
+      leg.origin_coords[0] === coords[0] &&
+      leg.origin_coords[1] === coords[1],
   )
 }
 
@@ -261,20 +262,5 @@ watch(
   z-index: 1000;
   width: 400px;
   text-align: center;
-}
-
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  color: white;
 }
 </style>
