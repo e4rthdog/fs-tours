@@ -178,7 +178,7 @@ $app->delete('/tours/{id}', function (Request $request, Response $response, $arg
     }
 
     // Check for legs associated with this tour
-    $legs = $database->has('tour-legs', ['tour_id' => $id]);
+    $legs = $database->has('tour_legs', ['tour_id' => $id]);
     if ($legs) {
         $response->getBody()->write(json_encode([
             'error' => 'Cannot delete tour with existing legs. Delete the legs first.'
@@ -197,22 +197,22 @@ $app->delete('/tours/{id}', function (Request $request, Response $response, $arg
 // Get all tour legs or a specific one by id
 $app->get('/legs[/{id}]', function (Request $request, Response $response, $args) use ($database) {
     $id = $args['id'] ?? null;
-    $legData = $database->select('tour-legs', [
+    $legData = $database->select('tour_legs', [
         '[>]tours' => ['tour_id' => 'tour_id']
     ], [
-        'tour-legs.id',
-        'tour-legs.tour_id',
-        'tour-legs.origin',
-        'tour-legs.destination',
-        'tour-legs.aircraft',
-        'tour-legs.route',
-        'tour-legs.comments',
-        'tour-legs.flight_date',
-        'tour-legs.link1',
-        'tour-legs.link2',
-        'tour-legs.link3',
+        'tour_legs.id',
+        'tour_legs.tour_id',
+        'tour_legs.origin',
+        'tour_legs.destination',
+        'tour_legs.aircraft',
+        'tour_legs.route',
+        'tour_legs.comments',
+        'tour_legs.flight_date',
+        'tour_legs.link1',
+        'tour_legs.link2',
+        'tour_legs.link3',
         'tours.tour_description'
-    ], $id ? ['tour-legs.id' => $id] : []);
+    ], $id ? ['tour_legs.id' => $id] : []);
 
     if ($id && empty($legData)) {
         $response->getBody()->write(json_encode(['error' => 'Tour leg not found']));
