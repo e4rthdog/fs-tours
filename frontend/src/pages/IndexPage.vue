@@ -149,7 +149,7 @@ const legDetailsColumns = [
     field: 'label',
     align: 'left',
     label: 'Field',
-    style: 'width: 100px; color: #f2c037;',
+    style: 'width: 100px; color: #ffffff;',
   },
   { name: 'value', field: 'value', align: 'left', label: 'Value' },
 ]
