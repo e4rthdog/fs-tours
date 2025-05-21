@@ -7,7 +7,7 @@
 
 # Git repo related instructions
 
-- UFollow [Conventional Commits](https://www.conventionalcommits.org/).
+- Follow [Conventional Commits](https://www.conventionalcommits.org/).
 - Always use the imperative mood in the subject line. Do not capitalize the first letter of the subject line.
 - Do not end the subject line with a period.Reference issues and pull requests liberally.
 - Always use the standard labels for git commit messages.

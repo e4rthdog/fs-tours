@@ -226,4 +226,82 @@ $app->get('/legs[/{id}]', function (Request $request, Response $response, $args)
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+// Add a new tour leg
+$app->post('/legs', function (Request $request, Response $response, $args) use ($database) {
+    $data = $request->getParsedBody();
+    // Ensure origin and destination are uppercase
+    if (isset($data['origin'])) {
+        $data['origin'] = strtoupper($data['origin']);
+    }
+    if (isset($data['destination'])) {
+        $data['destination'] = strtoupper($data['destination']);
+    }
+
+    // Validate required fields
+    if (empty($data['tour_id']) || empty($data['origin']) || empty($data['destination'])) {
+        $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    $database->insert('tour_legs', [
+        'tour_id' => $data['tour_id'],
+        'origin' => $data['origin'],
+        'destination' => $data['destination'],
+        'aircraft' => $data['aircraft'] ?? null,
+        'route' => $data['route'] ?? null,
+        'comments' => $data['comments'] ?? null,
+        'flight_date' => $data['flight_date'] ?? null,
+        'link1' => $data['link1'] ?? null,
+        'link2' => $data['link2'] ?? null,
+        'link3' => $data['link3'] ?? null
+    ]);
+
+    $response->getBody()->write(json_encode(['success' => true, 'id' => $database->id()]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+// Update an existing tour leg
+$app->put('/legs/{id}', function (Request $request, Response $response, $args) use ($database) {
+    $id = $args['id'];
+    $data = $request->getParsedBody();
+    // Ensure origin and destination are uppercase
+    if (isset($data['origin'])) {
+        $data['origin'] = strtoupper($data['origin']);
+    }
+    if (isset($data['destination'])) {
+        $data['destination'] = strtoupper($data['destination']);
+    }
+
+    // Validate required fields
+    if (empty($data['tour_id']) || empty($data['origin']) || empty($data['destination'])) {
+        $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    // Check if leg exists
+    $existing = $database->get('tour_legs', ['id'], ['id' => $id]);
+    if (!$existing) {
+        $response->getBody()->write(json_encode(['error' => 'Tour leg not found']));
+        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+    }
+
+    $database->update('tour_legs', [
+        'tour_id' => $data['tour_id'],
+        'origin' => $data['origin'],
+        'destination' => $data['destination'],
+        'aircraft' => $data['aircraft'] ?? null,
+        'route' => $data['route'] ?? null,
+        'comments' => $data['comments'] ?? null,
+        'flight_date' => $data['flight_date'] ?? null,
+        'link1' => $data['link1'] ?? null,
+        'link2' => $data['link2'] ?? null,
+        'link3' => $data['link3'] ?? null
+    ], [
+        'id' => $id
+    ]);
+
+    $response->getBody()->write(json_encode(['success' => true]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 $app->run();
