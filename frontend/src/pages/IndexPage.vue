@@ -23,7 +23,16 @@
         </LMarker>
 
         <!-- Polyline connecting Origin and Destination -->
-        <LPolyline :lat-lngs="[leg.origin_coords, leg.destination_coords]" :weight="3">
+        <LPolyline
+          :lat-lngs="[leg.origin_coords, leg.destination_coords]"
+          :weight="3"
+          color="#1f6eb8"
+          :options="{
+            smoothFactor: 1,
+            interactive: true,
+            bubblingMouseEvents: false,
+          }"
+        >
           <LPopup>
             <div class="q-pa-sm">
               <div class="text-h6">{{ leg.origin }}</div>
@@ -42,17 +51,18 @@
               <div class="q-mt-sm" v-if="leg.link1">
                 <q-btn
                   size="sm"
-                  color="primary"
-                  outline
+                  color="secondary"
+                  flat
                   icon="launch"
                   :href="leg.link1"
                   target="_blank"
-                  label="View Flight"
+                  label="VIEW FLIGHT"
+                  class="full-width"
+                  style="border: 1px solid #f19914"
                 />
               </div>
             </div>
           </LPopup>
-          <LTooltip>{{ leg.origin }} to {{ leg.destination }} (Leg {{ leg.sequence }})</LTooltip>
         </LPolyline>
       </template>
     </LMap>
