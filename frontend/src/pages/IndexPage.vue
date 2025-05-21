@@ -41,8 +41,12 @@
           <LTooltip permanent>{{ leg.origin }} ({{ index + 1 }})</LTooltip>
         </LMarker>
 
-        <!-- Destination Marker -->
-        <LMarker :lat-lng="leg.destination_coords" :icon="emptyIcon()">
+        <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
+        <LMarker 
+          v-if="!isLocationAnOrigin(leg.destination_coords, index)" 
+          :lat-lng="leg.destination_coords" 
+          :icon="emptyIcon()"
+        >
           <LPopup>
             <div class="q-pa-sm">
               <div class="text-h6">{{ leg.destination }}</div>
@@ -58,7 +62,6 @@
         <!-- Polyline connecting Origin and Destination -->
         <LPolyline
           :lat-lngs="[leg.origin_coords, leg.destination_coords]"
-          :color="getPolylineColor(leg)"
           :weight="3"
           @click="onLegClick(leg, index)"
         >
@@ -138,29 +141,13 @@ const $q = useQuasar()
 const selectedLeg = ref(null)
 const selectedLegIndex = ref(-1)
 
-// Tour colors - add more as needed
-const TOUR_COLORS = [
-  '#F44336', // Red
-  '#2196F3', // Blue
-  '#4CAF50', // Green
-  '#FF9800', // Orange
-  '#9C27B0', // Purple
-  '#00BCD4', // Cyan
-  '#FFEB3B', // Yellow
-  '#795548', // Brown
-  '#607D8B', // Blue Grey
-]
-
-const getPolylineColor = (leg) => {
-  // Get a consistent color based on tour ID
-  if (!leg.tour_id) return '#FFFFFF'
-
-  // Simple hash function to determine color index
-  const hash = leg.tour_id.split('').reduce((acc, char) => {
-    return acc + char.charCodeAt(0)
-  }, 0)
-
-  return TOUR_COLORS[hash % TOUR_COLORS.length]
+// Function to check if a location is an origin in any leg
+const isLocationAnOrigin = (coords, currentIndex) => {
+  return store.legs.some((leg, idx) => 
+    idx !== currentIndex && 
+    leg.origin_coords[0] === coords[0] && 
+    leg.origin_coords[1] === coords[1]
+  )
 }
 
 const formatDate = (dateString) => {
@@ -235,19 +222,17 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ff9800; /* Orange color */
   color: #fff;
   border-radius: 50%;
   width: 30px;
   height: 30px;
-  border: 2px solid #fff;
+  border: 1px solid #fff;
   font-weight: bold;
   font-size: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .destination-marker {
-  background: #607d8b; /* Blue Grey */
   width: 20px;
   height: 20px;
 }
