@@ -47,16 +47,40 @@
               <div v-if="leg.flight_date">
                 <strong>Date:</strong> {{ formatDate(leg.flight_date) }}
               </div>
-              <div class="q-mt-sm" v-if="leg.link1">
+              
+              <!-- Link buttons -->
+              <div class="q-mt-sm q-gutter-sm row">
                 <q-btn
+                  v-if="leg.link1"
                   size="sm"
                   color="secondary"
                   flat
                   icon="launch"
                   :href="leg.link1"
                   target="_blank"
-                  label="VIEW FLIGHT"
-                  class="full-width"
+                  label="Link 1"
+                  style="border: 1px solid #f19914"
+                />
+                <q-btn
+                  v-if="leg.link2"
+                  size="sm"
+                  color="secondary"
+                  flat
+                  icon="launch"
+                  :href="leg.link2"
+                  target="_blank"
+                  label="Link 2"
+                  style="border: 1px solid #f19914"
+                />
+                <q-btn
+                  v-if="leg.link3"
+                  size="sm"
+                  color="secondary"
+                  flat
+                  icon="launch"
+                  :href="leg.link3"
+                  target="_blank"
+                  label="Link 3"
                   style="border: 1px solid #f19914"
                 />
               </div>
