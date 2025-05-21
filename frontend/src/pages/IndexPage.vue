@@ -9,13 +9,13 @@
       />
       <template v-for="(leg, index) in store.legs" :key="leg.id">
         <!-- Origin Marker -->
-        <LMarker :lat-lng="leg.origin_coords" :icon="numberedIcon(index + 1)">
+        <LMarker :lat-lng="leg.origin_coords" :icon="numberedIcon(leg.sequence)">
           <LPopup>
             <div class="q-pa-sm">
               <div class="text-h6">{{ leg.origin }}</div>
               <q-separator class="q-my-xs" />
               <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
-              <div><strong>Leg:</strong> {{ index + 1 }}</div>
+              <div><strong>Leg:</strong> {{ leg.sequence }}</div>
               <div><strong>To:</strong> {{ leg.destination }}</div>
               <div v-if="leg.aircraft_model">
                 <strong>Aircraft:</strong> {{ leg.aircraft_model }}
@@ -38,7 +38,7 @@
               </div>
             </div>
           </LPopup>
-          <LTooltip permanent>{{ leg.origin }} ({{ index + 1 }})</LTooltip>
+          <LTooltip permanent>{{ leg.origin }} ({{ leg.sequence }})</LTooltip>
         </LMarker>
 
         <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
@@ -52,7 +52,7 @@
               <div class="text-h6">{{ leg.destination }}</div>
               <q-separator class="q-my-xs" />
               <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
-              <div><strong>Arrival point for leg:</strong> {{ index + 1 }}</div>
+              <div><strong>Arrival point for leg:</strong> {{ leg.sequence }}</div>
               <div v-if="leg.comments"><strong>Comments:</strong> {{ leg.comments }}</div>
             </div>
           </LPopup>
@@ -65,7 +65,7 @@
           :weight="3"
           @click="onLegClick(leg, index)"
         >
-          <LTooltip>{{ leg.origin }} to {{ leg.destination }} (Leg {{ index + 1 }})</LTooltip>
+          <LTooltip>{{ leg.origin }} to {{ leg.destination }} (Leg {{ leg.sequence }})</LTooltip>
         </LPolyline>
       </template>
     </LMap>
@@ -77,7 +77,7 @@
       </q-card-section>
       <q-card-section>
         <div><strong>Tour:</strong> {{ selectedLeg.tour_description }}</div>
-        <div><strong>Leg:</strong> {{ selectedLegIndex + 1 }}</div>
+        <div><strong>Leg:</strong> {{ selectedLeg.sequence }}</div>
         <div><strong>From:</strong> {{ selectedLeg.origin }}</div>
         <div><strong>To:</strong> {{ selectedLeg.destination }}</div>
         <div v-if="selectedLeg.aircraft_model">
