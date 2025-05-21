@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-none" style="height: 100vh; width: 100vw; overflow: hidden">
-    <LMap ref="map" style="height: 100vh; width: 100vw" :zoom="7" :center="[40, 27]">
+    <LMap ref="map" style="height: 100vh; width: 100vw" :zoom="3" :center="[40, 27]">
       <LTileLayer
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         layer-type="base"
@@ -89,11 +89,12 @@
 import { LMap, LTileLayer, LPolyline, LMarker, LTooltip, LPopup } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
-import { onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 
 const store = useFsToursStore()
 const $q = useQuasar()
+const map = ref(null)
 
 // Function to check if a location is an origin in any leg
 const isLocationAnOrigin = (coords, currentIndex) => {
@@ -146,6 +147,15 @@ onMounted(async () => {
   if (store.selectedTour) {
     try {
       await store.fetchTourLegs(store.selectedTour)
+
+      // If legs are loaded and map is ready, zoom to the first leg
+      if (store.legs.length > 0 && map.value) {
+        // Get the first leg
+        const firstLeg = store.legs[0]
+
+        // Set the map center to the origin coordinates of the first leg
+        map.value.leafletObject.setView(firstLeg.origin_coords, 6)
+      }
     } catch (err) {
       $q.notify({
         type: 'negative',
@@ -158,8 +168,26 @@ onMounted(async () => {
 // Watch for changes in the selected tour to update the map
 watch(
   () => store.selectedTour,
-  () => {
-    // Fetch legs when tour changes
+  async (newTourId) => {
+    if (newTourId) {
+      try {
+        await store.fetchTourLegs(newTourId)
+
+        // If legs are loaded and map is ready, zoom to the first leg
+        if (store.legs.length > 0 && map.value) {
+          // Get the first leg
+          const firstLeg = store.legs[0]
+
+          // Set the map center to the origin coordinates of the first leg
+          map.value.leafletObject.setView(firstLeg.origin_coords, 6)
+        }
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: `Error: ${err.message}`,
+        })
+      }
+    }
   },
 )
 </script>
