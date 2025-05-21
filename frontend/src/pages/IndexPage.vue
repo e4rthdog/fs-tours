@@ -28,9 +28,11 @@
           :weight="3"
           color="#1f6eb8"
           :options="{
-            smoothFactor: 1,
+            smoothFactor: 1.5,
             interactive: true,
             bubblingMouseEvents: false,
+            className: 'custom-polyline',
+            opacity: 0.9,
           }"
         >
           <LPopup>
@@ -57,16 +59,19 @@
                 </div>
               </div>
               <q-separator class="q-my-xs" />
-              <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
-              <div><strong>Leg:</strong> {{ leg.sequence }}</div>
-              <div v-if="leg.aircraft_model">
-                <strong>Aircraft:</strong> {{ leg.aircraft_model }}
-              </div>
-              <div v-if="leg.route"><strong>Route:</strong> {{ leg.route }}</div>
-              <div v-if="leg.comments"><strong>Comments:</strong> {{ leg.comments }}</div>
-              <div v-if="leg.flight_date">
-                <strong>Date:</strong> {{ formatDate(leg.flight_date) }}
-              </div>
+
+              <q-table
+                class="leg-info-table"
+                :rows="legDetailsToRows(leg)"
+                :columns="legDetailsColumns"
+                hide-bottom
+                hide-header
+                dense
+                flat
+                dark
+                :pagination="{ rowsPerPage: 0 }"
+                separator="horizontal"
+              />
 
               <!-- Link buttons -->
               <div class="q-mt-sm q-gutter-sm row">
@@ -136,6 +141,33 @@ import { useQuasar } from 'quasar'
 const store = useFsToursStore()
 const $q = useQuasar()
 const map = ref(null)
+
+// Table definition for leg details
+const legDetailsColumns = [
+  {
+    name: 'label',
+    field: 'label',
+    align: 'left',
+    label: 'Field',
+    style: 'width: 100px; color: #f2c037;',
+  },
+  { name: 'value', field: 'value', align: 'left', label: 'Value' },
+]
+
+// Convert leg data to row format for q-table
+const legDetailsToRows = (leg) => {
+  const rows = [
+    { label: 'Tour', value: leg.tour_description },
+    { label: 'Leg', value: leg.sequence },
+  ]
+
+  if (leg.aircraft_model) rows.push({ label: 'Aircraft', value: leg.aircraft_model })
+  if (leg.route) rows.push({ label: 'Route', value: leg.route })
+  if (leg.comments) rows.push({ label: 'Comments', value: leg.comments })
+  if (leg.flight_date) rows.push({ label: 'Date', value: formatDate(leg.flight_date) })
+
+  return rows
+}
 
 // Function to check if a location is an origin in any leg
 const isLocationAnOrigin = (coords, currentIndex) => {
@@ -265,5 +297,43 @@ watch(
   z-index: 1000;
   width: 400px;
   text-align: center;
+}
+
+/* Custom styling for Leaflet popups */
+:deep(.leaflet-popup-content-wrapper) {
+  background-color: #1d1d1d !important;
+  color: white !important;
+  border-radius: 4px !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+:deep(.leaflet-popup-tip) {
+  background-color: #1d1d1d !important;
+}
+
+:deep(.leaflet-popup-close-button) {
+  color: white !important;
+}
+
+/* Styling for the leg info table in popups */
+.leg-info-table {
+  margin-top: 8px;
+}
+
+.leg-info-table .q-table__top,
+.leg-info-table .q-table__bottom,
+.leg-info-table thead tr:first-child th {
+  padding: 0;
+}
+
+.leg-info-table tbody td {
+  padding: 4px 8px;
+  height: auto;
+  color: white;
+}
+
+.leg-info-table .q-table__card {
+  background: transparent;
+  box-shadow: none;
 }
 </style>
