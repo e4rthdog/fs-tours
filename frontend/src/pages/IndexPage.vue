@@ -9,12 +9,12 @@
       />
       <template v-for="leg in store.legs" :key="leg.id">
         <!-- Origin Marker -->
-        <LMarker :lat-lng="leg.origin_coords" :icon="numberedIcon(leg.id + 100)">
+        <LMarker :lat-lng="leg.origin_coords" :icon="numberedIcon(leg.id)">
           <LTooltip permanent>{{ leg.origin }}</LTooltip>
         </LMarker>
 
         <!-- Destination Marker -->
-        <LMarker :lat-lng="leg.destination_coords" :icon="numberedIcon(leg.id)">
+        <LMarker :lat-lng="leg.destination_coords" :icon="emptyIcon()">
           <LTooltip permanent>{{ leg.destination }}</LTooltip>
         </LMarker>
 
@@ -41,6 +41,14 @@ const numberedIcon = (number) =>
   L.divIcon({
     className: 'custom-marker',
     html: `<div class="marker-number">${number}</div>`,
+    iconSize: [25, 25],
+    iconAnchor: [10, 10],
+  })
+
+const emptyIcon = () =>
+  L.divIcon({
+    className: 'custom-marker',
+    html: `<div class="marker-number"></div>`,
     iconSize: [25, 25],
     iconAnchor: [10, 10],
   })
