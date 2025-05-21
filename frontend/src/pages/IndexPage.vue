@@ -10,6 +10,29 @@
       <template v-for="(leg, index) in store.legs" :key="leg.id">
         <!-- Origin Marker -->
         <LMarker :lat-lng="leg.origin_coords" :icon="numberedIcon(leg.sequence)">
+          <LTooltip permanent>{{ leg.origin }}</LTooltip>
+        </LMarker>
+
+        <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
+        <LMarker
+          v-if="!isLocationAnOrigin(leg.destination_coords, index)"
+          :lat-lng="leg.destination_coords"
+          :icon="emptyIcon()"
+        >
+          <LPopup>
+            <div class="q-pa-sm">
+              <div class="text-h6">{{ leg.destination }}</div>
+              <q-separator class="q-my-xs" />
+              <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
+              <div><strong>Arrival point for leg:</strong> {{ leg.sequence }}</div>
+              <div v-if="leg.comments"><strong>Comments:</strong> {{ leg.comments }}</div>
+            </div>
+          </LPopup>
+          <LTooltip permanent>{{ leg.destination }}</LTooltip>
+        </LMarker>
+
+        <!-- Polyline connecting Origin and Destination -->
+        <LPolyline :lat-lngs="[leg.origin_coords, leg.destination_coords]" :weight="3">
           <LPopup>
             <div class="q-pa-sm">
               <div class="text-h6">{{ leg.origin }}</div>
@@ -38,77 +61,10 @@
               </div>
             </div>
           </LPopup>
-          <LTooltip permanent>{{ leg.origin }} ({{ leg.sequence }})</LTooltip>
-        </LMarker>
-
-        <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
-        <LMarker
-          v-if="!isLocationAnOrigin(leg.destination_coords, index)"
-          :lat-lng="leg.destination_coords"
-          :icon="emptyIcon()"
-        >
-          <LPopup>
-            <div class="q-pa-sm">
-              <div class="text-h6">{{ leg.destination }}</div>
-              <q-separator class="q-my-xs" />
-              <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
-              <div><strong>Arrival point for leg:</strong> {{ leg.sequence }}</div>
-              <div v-if="leg.comments"><strong>Comments:</strong> {{ leg.comments }}</div>
-            </div>
-          </LPopup>
-          <LTooltip permanent>{{ leg.destination }}</LTooltip>
-        </LMarker>
-
-        <!-- Polyline connecting Origin and Destination -->
-        <LPolyline
-          :lat-lngs="[leg.origin_coords, leg.destination_coords]"
-          :weight="3"
-          @click="onLegClick(leg, index)"
-        >
           <LTooltip>{{ leg.origin }} to {{ leg.destination }} (Leg {{ leg.sequence }})</LTooltip>
         </LPolyline>
       </template>
     </LMap>
-
-    <!-- Info Panel -->
-    <q-card v-if="selectedLeg" class="info-panel">
-      <q-card-section>
-        <div class="text-h6">Flight Details</div>
-      </q-card-section>
-      <q-card-section>
-        <div><strong>Tour:</strong> {{ selectedLeg.tour_description }}</div>
-        <div><strong>Leg:</strong> {{ selectedLeg.sequence }}</div>
-        <div><strong>From:</strong> {{ selectedLeg.origin }}</div>
-        <div><strong>To:</strong> {{ selectedLeg.destination }}</div>
-        <div v-if="selectedLeg.aircraft_model">
-          <strong>Aircraft:</strong> {{ selectedLeg.aircraft_model }}
-        </div>
-        <div v-if="selectedLeg.route"><strong>Route:</strong> {{ selectedLeg.route }}</div>
-        <div v-if="selectedLeg.comments"><strong>Comments:</strong> {{ selectedLeg.comments }}</div>
-        <div v-if="selectedLeg.flight_date">
-          <strong>Date:</strong> {{ formatDate(selectedLeg.flight_date) }}
-        </div>
-      </q-card-section>
-      <q-card-actions align="right">
-        <q-btn
-          v-if="selectedLeg.link1"
-          color="primary"
-          flat
-          label="View Flight"
-          icon="launch"
-          :href="selectedLeg.link1"
-          target="_blank"
-        />
-        <q-btn
-          flat
-          label="Close"
-          color="negative"
-          icon="close"
-          v-close-popup
-          @click="selectedLeg = null"
-        />
-      </q-card-actions>
-    </q-card>
 
     <!-- No Tours Selected Message -->
     <div v-if="!store.selectedTour && !store.loading" class="no-tours-message">
@@ -133,13 +89,11 @@
 import { LMap, LTileLayer, LPolyline, LMarker, LTooltip, LPopup } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useQuasar } from 'quasar'
 
 const store = useFsToursStore()
 const $q = useQuasar()
-const selectedLeg = ref(null)
-const selectedLegIndex = ref(-1)
 
 // Function to check if a location is an origin in any leg
 const isLocationAnOrigin = (coords, currentIndex) => {
@@ -178,11 +132,6 @@ const emptyIcon = () =>
     iconAnchor: [15, 15],
   })
 
-const onLegClick = (leg, index) => {
-  selectedLeg.value = leg
-  selectedLegIndex.value = index
-}
-
 // Fix Leaflet's default icon paths
 delete L.Icon.Default.prototype._getIconUrl
 
@@ -209,11 +158,8 @@ onMounted(async () => {
 // Watch for changes in the selected tour to update the map
 watch(
   () => store.selectedTour,
-  async (newTourId) => {
-    if (newTourId) {
-      selectedLeg.value = null
-      selectedLegIndex.value = -1
-    }
+  () => {
+    // Fetch legs when tour changes
   },
 )
 </script>
@@ -240,18 +186,6 @@ watch(
 
 .marker-number {
   line-height: 12px;
-}
-
-.info-panel {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 300px;
-  z-index: 1000;
-  background: rgba(40, 40, 40, 0.9);
-  color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .no-tours-message {
