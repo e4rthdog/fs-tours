@@ -19,15 +19,6 @@
           :lat-lng="leg.destination_coords"
           :icon="emptyIcon()"
         >
-          <LPopup>
-            <div class="q-pa-sm">
-              <div class="text-h6">{{ leg.destination }}</div>
-              <q-separator class="q-my-xs" />
-              <div><strong>Tour:</strong> {{ leg.tour_description }}</div>
-              <div><strong>Arrival point for leg:</strong> {{ leg.sequence }}</div>
-              <div v-if="leg.comments"><strong>Comments:</strong> {{ leg.comments }}</div>
-            </div>
-          </LPopup>
           <LTooltip permanent>{{ leg.destination }}</LTooltip>
         </LMarker>
 
