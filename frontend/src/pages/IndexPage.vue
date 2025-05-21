@@ -10,7 +10,7 @@
       <template v-for="(leg, index) in store.legs" :key="leg.id">
         <!-- Origin Marker -->
         <LMarker :lat-lng="leg.origin_coords" :icon="numberedIcon(leg.sequence)">
-          <LTooltip permanent>{{ leg.origin }}</LTooltip>
+          <LTooltip permanent>{{ leg.origin }} - {{ leg.origin_name }}</LTooltip>
         </LMarker>
 
         <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
@@ -19,7 +19,7 @@
           :lat-lng="leg.destination_coords"
           :icon="emptyIcon()"
         >
-          <LTooltip permanent>{{ leg.destination }}</LTooltip>
+          <LTooltip permanent>{{ leg.destination }} - {{ leg.destination_name }}</LTooltip>
         </LMarker>
 
         <!-- Polyline connecting Origin and Destination -->
