@@ -218,8 +218,10 @@ $app->get('/tours/{id}/legs', function (Request $request, Response $response, $a
 
     // Assign sequence numbers
     $seq = 1;
-    foreach ($legs as &$leg) {
-        $leg['sequence'] = $seq++;
+    if (is_iterable($legs)) {
+        foreach ($legs as &$leg) {
+            $leg['sequence'] = $seq++;
+        }
     }
 
     $enrichedLegs = enrichLegData($legs);
