@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="bg-dark text-white">
+    <q-header class="bg-dark text-white">
       <q-toolbar>
         <q-toolbar-title>
           <q-avatar size="32px" class="q-mr-sm">
@@ -47,7 +47,7 @@
       <router-view />
     </q-page-container>
 
-    <q-footer elevated class="bg-dark text-white">
+    <q-footer class="bg-dark text-white">
       <div class="q-pa-sm q-gutter-sm row items-center justify-between">
         <div>FS Tours &copy; {{ new Date().getFullYear() }}</div>
         <div class="text-caption">Map last updated: {{ lastUpdated }}</div>
