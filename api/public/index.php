@@ -32,12 +32,18 @@ function enrichLegData($legData)
         $destAirportObj = (is_array($destAirport) && !empty($destAirport)) ? reset($destAirport) : null;
         $aircraftObj = (is_array($aircraft) && !empty($aircraft)) ? reset($aircraft) : null;
 
-        if (is_object($originAirportObj) && !is_null($originAirportObj->latitude) && !is_null($originAirportObj->longitude)) {
-            $legData['origin_coords'] = [(float)$originAirportObj->latitude, (float)$originAirportObj->longitude];
+        if (is_object($originAirportObj)) {
+            if (!is_null($originAirportObj->latitude) && !is_null($originAirportObj->longitude)) {
+                $legData['origin_coords'] = [(float)$originAirportObj->latitude, (float)$originAirportObj->longitude];
+            }
+            $legData['origin_name'] = $originAirportObj->name ?? null;
         }
 
-        if (is_object($destAirportObj) && !is_null($destAirportObj->latitude) && !is_null($destAirportObj->longitude)) {
-            $legData['destination_coords'] = [(float)$destAirportObj->latitude, (float)$destAirportObj->longitude];
+        if (is_object($destAirportObj)) {
+            if (!is_null($destAirportObj->latitude) && !is_null($destAirportObj->longitude)) {
+                $legData['destination_coords'] = [(float)$destAirportObj->latitude, (float)$destAirportObj->longitude];
+            }
+            $legData['destination_name'] = $destAirportObj->name ?? null;
         }
 
         if (is_object($aircraftObj) && !is_null($aircraftObj->model)) {
