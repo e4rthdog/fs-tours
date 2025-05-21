@@ -304,4 +304,18 @@ $app->put('/legs/{id}', function (Request $request, Response $response, $args) u
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+// Delete a tour leg by id
+$app->delete('/legs/{id}', function (Request $request, Response $response, $args) use ($database) {
+    $id = $args['id'];
+    // Check if leg exists
+    $existing = $database->get('tour_legs', ['id'], ['id' => $id]);
+    if (!$existing) {
+        $response->getBody()->write(json_encode(['error' => 'Tour leg not found']));
+        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+    }
+    $database->delete('tour_legs', ['id' => $id]);
+    $response->getBody()->write(json_encode(['success' => true]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 $app->run();
