@@ -7,7 +7,7 @@
         </q-avatar>
         <q-toolbar-title shrink class="q-mx-lg">FS Tours</q-toolbar-title>
         <q-select
-          v-model="selectedTour"
+          v-model="store.selectedTour"
           :options="tourOptions"
           option-value="value"
           option-label="label"
@@ -44,7 +44,14 @@
             <q-btn flat round dense icon="delete" title="Delete Tour" />
           </q-btn-group>
           <q-separator vertical spaced class="q-mx-md" />
-          <q-btn color="primary" icon="add" label="Add Leg" flat dense :disable="tourOptions.length === 0" />
+          <q-btn
+            color="primary"
+            icon="add"
+            label="Add Leg"
+            flat
+            dense
+            :disable="!store.selectedTour"
+          />
         </div>
       </q-toolbar>
     </q-header>
@@ -69,7 +76,7 @@ import { useQuasar } from 'quasar'
 
 const store = useFsToursStore()
 const $q = useQuasar()
-const selectedTour = ref(null)
+// const selectedTour = ref(null)
 const tourOptions = computed(() => {
   return store.tours.map((tour) => ({
     label: tour.tour_description,
