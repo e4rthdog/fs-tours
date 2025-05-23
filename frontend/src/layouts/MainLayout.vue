@@ -36,6 +36,14 @@
           @click="refreshData"
           title="Refresh tours data"
         />
+        <div class="q-ml-lg row items-center tour-actions-group">
+          <span class="text-body1 q-mr-sm">Tour actions:</span>
+          <q-btn-group flat>
+            <q-btn flat round dense icon="add" title="Create Tour" />
+            <q-btn flat round dense icon="edit" title="Edit Tour" />
+            <q-btn flat round dense icon="delete" title="Delete Tour" />
+          </q-btn-group>
+        </div>
       </q-toolbar>
     </q-header>
 
