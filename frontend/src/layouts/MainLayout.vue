@@ -45,10 +45,10 @@
           </q-btn-group>
           <q-separator vertical spaced class="q-mx-md" />
           <q-btn
+            class="q-px-md"
             color="primary"
             icon="add"
             label="Add Leg"
-            flat
             dense
             :disable="!store.selectedTour"
           />
@@ -76,7 +76,6 @@ import { useQuasar } from 'quasar'
 
 const store = useFsToursStore()
 const $q = useQuasar()
-// const selectedTour = ref(null)
 const tourOptions = computed(() => {
   return store.tours.map((tour) => ({
     label: tour.tour_description,
