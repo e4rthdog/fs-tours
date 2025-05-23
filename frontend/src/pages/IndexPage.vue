@@ -40,22 +40,8 @@
               <div class="flex items-center justify-between">
                 <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
                 <div class="q-gutter-x-sm">
-                  <q-btn
-                    square
-                    glossy
-                    size="xs"
-                    color="secondary"
-                    icon="edit"
-                    style="border: 1px solid #f2c037"
-                  />
-                  <q-btn
-                    square
-                    glossy
-                    size="xs"
-                    color="negative"
-                    icon="delete"
-                    style="border: 1px solid #c10015"
-                  />
+                  <q-btn flat round dense icon="edit" title="Edit Leg" />
+                  <q-btn flat round dense icon="delete" title="Delete Leg" />
                 </div>
               </div>
 
