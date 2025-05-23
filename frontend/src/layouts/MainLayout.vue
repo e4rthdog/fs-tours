@@ -43,6 +43,8 @@
             <q-btn flat round dense icon="edit" title="Edit Tour" />
             <q-btn flat round dense icon="delete" title="Delete Tour" />
           </q-btn-group>
+          <q-separator vertical spaced class="q-mx-md" />
+          <q-btn color="primary" icon="add" label="Add Leg" flat dense :disable="tourOptions.length === 0" />
         </div>
       </q-toolbar>
     </q-header>
