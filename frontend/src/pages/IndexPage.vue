@@ -63,7 +63,14 @@
               <div class="flex items-center justify-between">
                 <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
                 <div class="q-gutter-x-sm">
-                  <q-btn flat round dense icon="edit" title="Edit Leg" />
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    icon="edit"
+                    title="Edit Leg"
+                    @click="openEditDialog(leg)"
+                  />
                   <q-btn
                     flat
                     round
@@ -151,6 +158,49 @@
       <q-spinner-dots color="primary" size="40px" />
       <div class="q-mt-sm text-center">{{ store.loading ? 'Processing...' : 'Loading...' }}</div>
     </div>
+
+    <!-- Edit Leg Dialog -->
+    <q-dialog v-model="editDialog.show" persistent dark>
+      <q-card style="min-width: 400px; max-width: 90vw">
+        <q-card-section class="q-pa-sm bg-primary text-white">
+          <div class="text-h6">Edit Leg</div>
+        </q-card-section>
+        <q-card-section class="q-gutter-md">
+          <q-input v-model="editDialog.form.tour_id" label="Tour ID" dense outlined readonly />
+          <q-input v-model="editDialog.form.origin" label="Origin ICAO" dense outlined required />
+          <q-input
+            v-model="editDialog.form.destination"
+            label="Destination ICAO"
+            dense
+            outlined
+            required
+          />
+          <q-input v-model="editDialog.form.aircraft" label="Aircraft ICAO" dense outlined />
+          <q-input v-model="editDialog.form.route" label="Route" dense outlined />
+          <q-input
+            v-model="editDialog.form.comments"
+            label="Comments"
+            dense
+            outlined
+            type="textarea"
+          />
+          <q-input v-model="editDialog.form.link1" label="Link 1" dense outlined />
+          <q-input v-model="editDialog.form.link2" label="Link 2" dense outlined />
+          <q-input v-model="editDialog.form.link3" label="Link 3" dense outlined />
+          <q-input v-model="editDialog.form.flight_date" label="Date" dense outlined type="date" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="grey" v-close-popup :disable="store.loading" />
+          <q-btn
+            flat
+            label="Save"
+            color="primary"
+            @click="submitEditLeg"
+            :loading="store.loading"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -166,7 +216,7 @@ import {
 } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, reactive } from 'vue'
 import { useQuasar } from 'quasar'
 
 const store = useFsToursStore()
@@ -343,6 +393,62 @@ const confirmDeleteLeg = (leg) => {
       store.loading = false
     }
   })
+}
+
+const editDialog = reactive({
+  show: false,
+  leg: null,
+  form: {
+    tour_id: '',
+    origin: '',
+    destination: '',
+    aircraft: '',
+    route: '',
+    comments: '',
+    link1: '',
+    link2: '',
+    link3: '',
+    flight_date: '',
+  },
+})
+
+const openEditDialog = (leg) => {
+  editDialog.leg = leg
+  editDialog.form = {
+    tour_id: leg['tour-id'] || leg.tour_id || '',
+    origin: leg.origin,
+    destination: leg.destination,
+    aircraft: leg.aircraft || '',
+    route: leg.route || '',
+    comments: leg.comments || '',
+    link1: leg.link1 || '',
+    link2: leg.link2 || '',
+    link3: leg.link3 || '',
+    flight_date: leg.flight_date || '',
+  }
+  editDialog.show = true
+}
+
+const submitEditLeg = async () => {
+  try {
+    store.loading = true
+    await store.updateLeg({
+      id: editDialog.leg.id,
+      ...editDialog.form,
+    })
+    editDialog.show = false
+    if (store.selectedTour) await store.fetchTourLegs(store.selectedTour)
+    $q.notify({ type: 'positive', message: 'Leg updated', position: 'top', timeout: 2000 })
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: err.message || 'Failed to update leg',
+      position: 'top',
+      timeout: 3000,
+    })
+  } finally {
+    store.loading = false
+  }
 }
 </script>
 
