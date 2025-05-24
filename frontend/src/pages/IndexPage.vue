@@ -9,15 +9,14 @@
       />
       <template v-for="(leg, index) in store.legs" :key="leg.id">
         <!-- Origin Marker -->
-        <LMarker :lat-lng="leg.origin_coords" :icon="numberedIcon(leg.sequence)">
-          <LTooltip permanent>{{ leg.origin }} - {{ leg.origin_name }}</LTooltip>
+        <LMarker :lat-lng="leg.origin_coords">
+          <LTooltip permanent>{{ leg.sequence }}. {{ leg.origin }} - {{ leg.origin_name }}</LTooltip>
         </LMarker>
 
         <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
         <LMarker
           v-if="!isLocationAnOrigin(leg.destination_coords, index)"
           :lat-lng="leg.destination_coords"
-          :icon="emptyIcon()"
         >
           <LTooltip permanent>{{ leg.destination }} - {{ leg.destination_name }}</LTooltip>
         </LMarker>
@@ -188,22 +187,6 @@ const formatDate = (dateString) => {
     return dateString
   }
 }
-
-const numberedIcon = (number) =>
-  L.divIcon({
-    className: 'bg-primary text-white rounded-borders flex flex-center shadow-2',
-    html: `<div class="text-weight-bold text-caption">${number}</div>`,
-    iconSize: [25, 25],
-    iconAnchor: [15, 15],
-  })
-
-const emptyIcon = () =>
-  L.divIcon({
-    className: 'bg-primary text-white rounded-borders flex flex-center shadow-2',
-    html: `<div class="text-weight-bold text-caption"></div>`,
-    iconSize: [25, 25],
-    iconAnchor: [15, 15],
-  })
 
 // Fix Leaflet's default icon paths
 delete L.Icon.Default.prototype._getIconUrl
