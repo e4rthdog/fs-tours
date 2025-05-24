@@ -7,7 +7,7 @@
         name="OpenStreetMap"
         attribution="&copy; OpenStreetMap contributors"
       />
-      <template v-for="(leg, index) in store.legs" :key="leg.id">
+      <template v-for="(leg, index) in store.legs" :key="leg.id + '-' + leg.sequence">
         <!-- Origin Marker -->
         <LMarker :lat-lng="leg.origin_coords">
           <LTooltip permanent
