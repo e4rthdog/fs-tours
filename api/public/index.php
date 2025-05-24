@@ -281,7 +281,8 @@ $app->get('/legs[/{id}]', function (Request $request, Response $response, $args)
 
 // Add a new tour leg
 $app->post('/legs', function (Request $request, Response $response, $args) use ($database) {
-  $data = $request->getParsedBody();
+  $body = $request->getBody()->getContents();
+  $data = json_decode($body, true);
   // Ensure origin and destination are uppercase
   if (isset($data['origin'])) {
     $data['origin'] = strtoupper($data['origin']);
@@ -316,7 +317,8 @@ $app->post('/legs', function (Request $request, Response $response, $args) use (
 // Update an existing tour leg
 $app->put('/legs/{id}', function (Request $request, Response $response, $args) use ($database) {
   $id = $args['id'];
-  $data = $request->getParsedBody();
+  $body = $request->getBody()->getContents();
+  $data = json_decode($body, true);
   // Ensure origin and destination are uppercase
   if (isset($data['origin'])) {
     $data['origin'] = strtoupper($data['origin']);
@@ -324,7 +326,6 @@ $app->put('/legs/{id}', function (Request $request, Response $response, $args) u
   if (isset($data['destination'])) {
     $data['destination'] = strtoupper($data['destination']);
   }
-
   // Validate required fields
   if (empty($data['tour_id']) || empty($data['origin']) || empty($data['destination'])) {
     $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
@@ -352,7 +353,6 @@ $app->put('/legs/{id}', function (Request $request, Response $response, $args) u
   ], [
     'id' => $id
   ]);
-
   $response->getBody()->write(json_encode(['success' => true]));
   return $response->withHeader('Content-Type', 'application/json');
 });

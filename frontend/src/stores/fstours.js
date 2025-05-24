@@ -95,7 +95,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch(`http://fs-tours-api.ddev.site/legs/${leg.id}`, {
+      const res = await fetch(`https://fs-tours-api.ddev.site/legs/${leg.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -112,6 +112,7 @@ export const useFsToursStore = defineStore('fstours', () => {
           link1: leg.link1,
           link2: leg.link2,
           link3: leg.link3,
+          flight_date: leg.flight_date,
         }),
         mode: 'cors',
       })
