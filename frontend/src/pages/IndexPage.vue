@@ -163,7 +163,9 @@
     <q-dialog v-model="editDialog.show" persistent dark>
       <q-card style="min-width: 400px; max-width: 90vw">
         <q-card-section class="q-pa-sm bg-primary text-white">
-          <div class="text-h6">Edit Leg for tour: {{ editDialog.form.tour_id }}</div>
+          <div class="text-h6">
+            Edit Leg for tour: <span class="text-orange">{{ editDialog.form.tour_id }}</span>
+          </div>
         </q-card-section>
         <q-card-section class="q-gutter-md">
           <q-input v-model="editDialog.form.origin" label="Origin ICAO" dense outlined required />
@@ -212,7 +214,7 @@
           <q-btn
             flat
             label="Save"
-            color="primary"
+            color="positive"
             @click="submitEditLeg"
             :loading="store.loading"
           />
