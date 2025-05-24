@@ -10,7 +10,9 @@
       <template v-for="(leg, index) in store.legs" :key="leg.id">
         <!-- Origin Marker -->
         <LMarker :lat-lng="leg.origin_coords">
-          <LTooltip permanent>{{ leg.sequence }}. {{ leg.origin }} - {{ leg.origin_name }}</LTooltip>
+          <LTooltip permanent
+            >{{ leg.sequence }}. {{ leg.origin }} - {{ leg.origin_name }}</LTooltip
+          >
         </LMarker>
 
         <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
@@ -100,6 +102,16 @@
             </div>
           </LPopup>
         </LPolyline>
+
+        <!-- Sequence Number Marker at the midpoint of the polyline -->
+        <LMarker
+          :lat-lng="calculateMidpoint(leg.origin_coords, leg.destination_coords)"
+          :options="{
+            interactive: false,
+            zIndexOffset: 1000,
+            icon: createSequenceIcon(leg.sequence),
+          }"
+        />
       </template>
     </LMap>
 
@@ -139,6 +151,21 @@ import { useQuasar } from 'quasar'
 const store = useFsToursStore()
 const $q = useQuasar()
 const map = ref(null)
+
+// Calculate the midpoint between two coordinates
+const calculateMidpoint = (coord1, coord2) => {
+  return [(coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2]
+}
+
+// Create a custom icon for the sequence number
+const createSequenceIcon = (sequence) => {
+  return new L.DivIcon({
+    html: `<div class='sequence-number'>${sequence}</div>`,
+    className: 'sequence-icon',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  })
+}
 
 // Table definition for leg details
 const legDetailsColumns = [
@@ -312,5 +339,44 @@ const confirmDeleteLeg = (leg) => {
 
 :deep(.leaflet-popup-close-button) {
   color: white !important;
+}
+
+/* Styling for sequence number markers */
+:deep(.sequence-icon) {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:deep(.sequence-number) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: white;
+  color: #1f6eb8;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.sequence-icon {
+  text-align: center;
+  line-height: 24px;
+  font-weight: bold;
+  color: #1f6eb8;
+}
+
+.sequence-number {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: white;
+  color: #1f6eb8;
+  font-weight: bold;
+  line-height: 24px;
 }
 </style>
