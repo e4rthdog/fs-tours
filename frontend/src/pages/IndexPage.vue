@@ -8,20 +8,32 @@
         attribution="&copy; OpenStreetMap contributors"
       />
       <template v-for="(leg, index) in store.legs" :key="leg.id + '-' + leg.sequence">
-        <!-- Origin Marker -->
-        <LMarker :lat-lng="leg.origin_coords">
-          <LTooltip permanent
-            >{{ leg.sequence }}. {{ leg.origin }} - {{ leg.origin_name }}</LTooltip
-          >
-        </LMarker>
+        <!-- Origin CircleMarker -->
+        <LCircleMarker
+          :lat-lng="leg.origin_coords"
+          :radius="5"
+          :color="'#1976d2'"
+          :fill-color="'#1976d2'"
+          :fill-opacity="0.9"
+          :weight="2"
+        >
+          <LTooltip permanent>
+            {{ leg.sequence }}. {{ leg.origin }} - {{ leg.origin_name }}
+          </LTooltip>
+        </LCircleMarker>
 
-        <!-- Destination Marker - Only rendered if it's not an origin of another leg -->
-        <LMarker
+        <!-- Destination CircleMarker - Only rendered if it's not an origin of another leg -->
+        <LCircleMarker
           v-if="!isLocationAnOrigin(leg.destination_coords, index)"
           :lat-lng="leg.destination_coords"
+          :radius="5"
+          :color="'#1976d2'"
+          :fill-color="'#1976d2'"
+          :fill-opacity="0.9"
+          :weight="2"
         >
-          <LTooltip permanent>{{ leg.destination }} - {{ leg.destination_name }}</LTooltip>
-        </LMarker>
+          <LTooltip permanent> {{ leg.destination }} - {{ leg.destination_name }} </LTooltip>
+        </LCircleMarker>
 
         <!-- Polyline connecting Origin and Destination -->
         <LPolyline
@@ -143,7 +155,15 @@
 </template>
 
 <script setup>
-import { LMap, LTileLayer, LPolyline, LMarker, LTooltip, LPopup } from '@vue-leaflet/vue-leaflet'
+import {
+  LMap,
+  LTileLayer,
+  LPolyline,
+  LMarker,
+  LTooltip,
+  LPopup,
+  LCircleMarker,
+} from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
 import { onMounted, ref, watch } from 'vue'
