@@ -30,9 +30,20 @@
           color="#1f6eb8"
           :options="{
             smoothFactor: 1.5,
-            interactive: true,
+            interactive: false,
             bubblingMouseEvents: false,
             opacity: 0.9,
+          }"
+        >
+        </LPolyline>
+
+        <!-- Sequence Number Marker at the midpoint of the polyline -->
+        <LMarker
+          :lat-lng="calculateMidpoint(leg.origin_coords, leg.destination_coords)"
+          :options="{
+            interactive: true,
+            zIndexOffset: 1000,
+            icon: createSequenceIcon(leg.sequence),
           }"
         >
           <LPopup>
@@ -101,17 +112,7 @@
               </div>
             </div>
           </LPopup>
-        </LPolyline>
-
-        <!-- Sequence Number Marker at the midpoint of the polyline -->
-        <LMarker
-          :lat-lng="calculateMidpoint(leg.origin_coords, leg.destination_coords)"
-          :options="{
-            interactive: false,
-            zIndexOffset: 1000,
-            icon: createSequenceIcon(leg.sequence),
-          }"
-        />
+        </LMarker>
       </template>
     </LMap>
 
