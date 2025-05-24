@@ -64,6 +64,33 @@ export const useFsToursStore = defineStore('fstours', () => {
     legs.value = []
   }
 
+  async function deleteLeg(legId) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await fetch(`http://fs-tours-api.ddev.site/legs/${legId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        mode: 'cors', // Explicitly specify CORS mode
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Failed to delete leg' }))
+        throw new Error(errorData.message || 'Failed to delete leg')
+      }
+
+      return await res.json()
+    } catch (err) {
+      error.value = err.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     legs,
     tours,
@@ -75,6 +102,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     fetchTours,
     setSelectedTour,
     clearLegs,
+    deleteLeg,
   }
 })
 

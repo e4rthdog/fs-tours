@@ -72,6 +72,14 @@ $app->add(function ($request, $handler) {
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 });
 
+// Handle OPTIONS preflight requests
+$app->options('/{routes:.+}', function (Request $request, Response $response) {
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+});
+
 // Authentication middleware
 $authMiddleware = function ($request, $handler) {
     $auth = $request->getHeaderLine('Authorization');
@@ -359,7 +367,10 @@ $app->delete('/legs/{id}', function (Request $request, Response $response, $args
         return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
     }
     $database->delete('tour_legs', ['id' => $id]);
-    $response->getBody()->write(json_encode(['success' => true]));
+    $response->getBody()->write(json_encode([
+        'success' => true,
+        'message' => 'Tour leg deleted successfully'
+    ]));
     return $response->withHeader('Content-Type', 'application/json');
 });
 

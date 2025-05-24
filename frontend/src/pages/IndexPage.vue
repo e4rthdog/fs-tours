@@ -31,22 +31,29 @@
             smoothFactor: 1.5,
             interactive: true,
             bubblingMouseEvents: false,
-            className: 'custom-polyline',
             opacity: 0.9,
           }"
         >
           <LPopup>
-            <div class="q-pa-sm">
+            <div class="q-pa-sm bg-dark text-white">
               <div class="flex items-center justify-between">
                 <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
                 <div class="q-gutter-x-sm">
                   <q-btn flat round dense icon="edit" title="Edit Leg" />
-                  <q-btn flat round dense icon="delete" title="Delete Leg" />
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    icon="delete"
+                    title="Delete Leg"
+                    @click="confirmDeleteLeg(leg)"
+                    :loading="store.loading"
+                  />
                 </div>
               </div>
 
               <q-table
-                class="leg-info-table"
+                class="q-mt-sm bg-transparent text-white"
                 :rows="legDetailsToRows(leg)"
                 :columns="legDetailsColumns"
                 hide-bottom
@@ -68,7 +75,7 @@
                   :href="leg.link1"
                   target="_blank"
                   label="Link 1"
-                  style="border: 1px solid #f19914"
+                  outline
                 />
                 <q-btn
                   v-if="leg.link2"
@@ -78,7 +85,7 @@
                   :href="leg.link2"
                   target="_blank"
                   label="Link 2"
-                  style="border: 1px solid #f19914"
+                  outline
                 />
                 <q-btn
                   v-if="leg.link3"
@@ -88,7 +95,7 @@
                   :href="leg.link3"
                   target="_blank"
                   label="Link 3"
-                  style="border: 1px solid #f19914"
+                  outline
                 />
               </div>
             </div>
@@ -98,7 +105,11 @@
     </LMap>
 
     <!-- No Tours Selected Message -->
-    <div v-if="!store.selectedTour && !store.loading" class="no-tours-message">
+    <div
+      v-if="!store.selectedTour && !store.loading"
+      class="fixed-center z-max"
+      style="width: 400px"
+    >
       <q-card flat bordered class="q-pa-md bg-dark text-white">
         <q-card-section>
           <div class="text-h6">Welcome to FS Tours</div>
@@ -109,9 +120,12 @@
     </div>
 
     <!-- Loading Overlay -->
-    <div v-if="store.loading" class="loading-overlay">
+    <div
+      v-if="store.loading"
+      class="fixed-center bg-dark text-white q-pa-md rounded-borders shadow-4 z-max"
+    >
       <q-spinner-dots color="primary" size="40px" />
-      <div class="q-mt-sm">Loading...</div>
+      <div class="q-mt-sm text-center">{{ store.loading ? 'Processing...' : 'Loading...' }}</div>
     </div>
   </q-page>
 </template>
@@ -134,7 +148,7 @@ const legDetailsColumns = [
     field: 'label',
     align: 'left',
     label: 'Field',
-    style: 'width: 100px; color: #ffffff;',
+    style: 'width: 100px; font-weight: bold;',
   },
   { name: 'value', field: 'value', align: 'left', label: 'Value' },
 ]
@@ -177,16 +191,16 @@ const formatDate = (dateString) => {
 
 const numberedIcon = (number) =>
   L.divIcon({
-    className: 'custom-marker',
-    html: `<div class="marker-number">${number}</div>`,
+    className: 'bg-primary text-white rounded-borders flex flex-center shadow-2',
+    html: `<div class="text-weight-bold text-caption">${number}</div>`,
     iconSize: [25, 25],
     iconAnchor: [15, 15],
   })
 
 const emptyIcon = () =>
   L.divIcon({
-    className: 'custom-marker destination-marker',
-    html: `<div class="marker-number"></div>`,
+    className: 'bg-primary text-white rounded-borders flex flex-center shadow-2',
+    html: `<div class="text-weight-bold text-caption"></div>`,
     iconSize: [25, 25],
     iconAnchor: [15, 15],
   })
@@ -248,78 +262,72 @@ watch(
     }
   },
 )
+
+// Function to handle leg deletion with confirmation
+const confirmDeleteLeg = (leg) => {
+  $q.dialog({
+    title: 'Confirm Deletion',
+    message: `Are you sure you want to delete the leg from ${leg.origin} to ${leg.destination}?`,
+    cancel: {
+      label: 'Cancel',
+      flat: true,
+    },
+    ok: {
+      label: 'Delete',
+      color: 'negative',
+    },
+    persistent: true,
+    dark: true,
+  }).onOk(async () => {
+    try {
+      store.loading = true
+      const response = await store.deleteLeg(leg.id)
+
+      // Close any open popups on the map
+      if (map.value && map.value.leafletObject) {
+        map.value.leafletObject.closePopup()
+      }
+
+      // Show success message
+      $q.notify({
+        type: 'positive',
+        message: response.message || 'Leg deleted successfully',
+        position: 'top',
+        timeout: 2000,
+      })
+
+      // Refresh tour legs after deletion
+      if (store.selectedTour) {
+        await store.fetchTourLegs(store.selectedTour)
+      }
+    } catch (err) {
+      // Show error message
+      $q.notify({
+        type: 'negative',
+        message: err.message || 'Failed to delete leg',
+        position: 'top',
+        timeout: 3000,
+      })
+    } finally {
+      store.loading = false
+    }
+  })
+}
 </script>
 
 <style>
-.custom-marker {
-  display: flex;
-  background-color: #1f6eb8; /* Accent color */
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  border: 1px solid #fff;
-  font-weight: bold;
-  font-size: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-}
-
-.destination-marker {
-  background-color: #1f6eb8; /* Accent color */
-}
-
-.marker-number {
-  line-height: 12px;
-}
-
-.no-tours-message {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  width: 400px;
-  text-align: center;
-}
-
-/* Custom styling for Leaflet popups */
+/* Override Leaflet popups to use dark theme */
 :deep(.leaflet-popup-content-wrapper) {
-  background-color: #1d1d1d !important;
+  background-color: var(--q-dark) !important;
   color: white !important;
   border-radius: 4px !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5) !important;
 }
 
 :deep(.leaflet-popup-tip) {
-  background-color: #1d1d1d !important;
+  background-color: var(--q-dark) !important;
 }
 
 :deep(.leaflet-popup-close-button) {
   color: white !important;
-}
-
-/* Styling for the leg info table in popups */
-.leg-info-table {
-  margin-top: 8px;
-}
-
-.leg-info-table .q-table__top,
-.leg-info-table .q-table__bottom,
-.leg-info-table thead tr:first-child th {
-  padding: 0;
-}
-
-.leg-info-table tbody td {
-  padding: 4px 8px;
-  height: auto;
-  color: white;
-  border-style: none;
-}
-
-.leg-info-table .q-table__card {
-  background: transparent;
-  box-shadow: none;
 }
 </style>
