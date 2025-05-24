@@ -162,63 +162,12 @@
     <!-- Edit Leg Dialog -->
     <q-dialog v-model="editDialog.show" persistent dark>
       <q-card style="min-width: 400px; max-width: 90vw">
-        <q-card-section class="q-pa-sm bg-primary text-white">
-          <div class="text-h6">
-            Edit Leg for tour: <span class="text-orange">{{ editDialog.form.tour_id }}</span>
-          </div>
-        </q-card-section>
-        <q-card-section class="q-gutter-md">
-          <q-input v-model="editDialog.form.origin" label="Origin ICAO" dense outlined required />
-          <q-input
-            v-model="editDialog.form.destination"
-            label="Destination ICAO"
-            dense
-            outlined
-            required
-          />
-          <q-input v-model="editDialog.form.aircraft" label="Aircraft ICAO" dense outlined />
-          <q-input
-            v-model="editDialog.form.route"
-            label="Route"
-            dense
-            outlined
-            type="textarea"
-            :rows="2"
-          />
-          <q-input
-            v-model="editDialog.form.comments"
-            label="Comments"
-            dense
-            outlined
-            type="textarea"
-            :rows="2"
-          />
-          <q-input v-model="editDialog.form.link1" label="Link 1" dense outlined />
-          <q-input v-model="editDialog.form.link2" label="Link 2" dense outlined />
-          <q-input v-model="editDialog.form.link3" label="Link 3" dense outlined />
-          <q-date
-            v-model="editDialog.form.flight_date"
-            mask="YYYY-MM-DD"
-            :locale="'el'"
-            dense
-            title="Flight Date"
-            flat
-            bordered
-            outlined
-            landscape
-            class="q-mt-sm"
-          />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey" v-close-popup :disable="store.loading" />
-          <q-btn
-            flat
-            label="Save"
-            color="positive"
-            @click="submitEditLeg"
-            :loading="store.loading"
-          />
-        </q-card-actions>
+        <LegForm
+          v-model="editDialog.form"
+          :loading="store.loading"
+          @submit="submitEditLeg"
+          @cancel="editDialog.show = false"
+        />
       </q-card>
     </q-dialog>
   </q-page>
@@ -238,6 +187,7 @@ import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
 import { onMounted, ref, watch, reactive } from 'vue'
 import { useQuasar } from 'quasar'
+import LegForm from 'components/LegForm.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
