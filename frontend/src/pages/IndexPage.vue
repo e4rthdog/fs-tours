@@ -59,77 +59,14 @@
           }"
         >
           <LPopup>
-            <div class="q-pa-sm bg-dark text-white">
-              <div class="flex items-center justify-between">
-                <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
-                <div class="q-gutter-x-sm">
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="edit"
-                    title="Edit Leg"
-                    @click="openEditDialog(leg)"
-                  />
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="delete"
-                    title="Delete Leg"
-                    @click="confirmDeleteLeg(leg)"
-                    :loading="store.loading"
-                  />
-                </div>
-              </div>
-
-              <q-table
-                class="q-mt-sm bg-transparent text-white"
-                :rows="legDetailsToRows(leg)"
-                :columns="legDetailsColumns"
-                hide-bottom
-                hide-header
-                dense
-                flat
-                dark
-                :pagination="{ rowsPerPage: 0 }"
-                separator="horizontal"
-              />
-
-              <!-- Link buttons -->
-              <div class="q-mt-sm q-gutter-sm row">
-                <q-btn
-                  v-if="leg.link1"
-                  size="sm"
-                  color="warning"
-                  icon="launch"
-                  :href="leg.link1"
-                  target="_blank"
-                  label="Link 1"
-                  outline
-                />
-                <q-btn
-                  v-if="leg.link2"
-                  size="sm"
-                  color="warning"
-                  icon="launch"
-                  :href="leg.link2"
-                  target="_blank"
-                  label="Link 2"
-                  outline
-                />
-                <q-btn
-                  v-if="leg.link3"
-                  size="sm"
-                  color="warning"
-                  icon="launch"
-                  :href="leg.link3"
-                  target="_blank"
-                  label="Link 3"
-                  outline
-                />
-              </div>
-            </div>
+            <LegInfo
+              :leg="leg"
+              :loading="store.loading"
+              :leg-details-to-rows="legDetailsToRows"
+              :leg-details-columns="legDetailsColumns"
+              @edit="openEditDialog"
+              @delete="confirmDeleteLeg"
+            />
           </LPopup>
         </LMarker>
       </template>
@@ -188,6 +125,7 @@ import { useFsToursStore } from 'stores/fstours'
 import { onMounted, ref, watch, reactive } from 'vue'
 import { useQuasar } from 'quasar'
 import LegForm from 'components/LegForm.vue'
+import LegInfo from 'components/LegInfo.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()

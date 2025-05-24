@@ -18,7 +18,6 @@
       <q-date
         v-model="form.flight_date"
         mask="YYYY-MM-DD"
-        :locale="'el'"
         dense
         flat
         bordered
