@@ -2,8 +2,8 @@
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-dark text-white">
       <q-toolbar>
-        <q-avatar size="32px" class="q-mr-md">
-          <img src="https://i.imgur.com/4M34hi2.png" alt="Logo" />
+        <q-avatar square size="32px" class="q-mr-md">
+          <img src="icons/fs-tours.png" alt="Logo" />
         </q-avatar>
         <q-toolbar-title shrink class="q-mx-lg">FS Tours</q-toolbar-title>
         <q-select
