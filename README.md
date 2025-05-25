@@ -50,7 +50,61 @@ fs-tours is a personal Flight Simulator tour viewer. The application allows user
 
 1. `cd frontend`
 2. Install dependencies: `npm install`
-3. Start the dev server: `quasar dev`
+3. **Configure the application**: Copy and edit the configuration file:
+
+   ```bash
+   cd src/config
+   cp config.example.js config.js
+   ```
+
+   Edit `config.js` with your settings:
+
+   ```javascript
+   export const config = {
+   	// Update this to your API server URL
+   	apiBaseUrl: 'https://your-api-domain.com',
+
+   	// Update this to your SimBrief username
+   	simbriefUsername: 'your-simbrief-username',
+   }
+   ```
+
+4. Start the dev server: `quasar dev`
+
+---
+
+## Configuration
+
+### Configuration Options
+
+#### `apiBaseUrl`
+
+- The base URL for your FS Tours API server
+- Examples:
+  - Development: `http://fs-tours-api.ddev.site`
+  - Production: `https://api.your-domain.com`
+
+#### `simbriefUsername`
+
+- Your SimBrief account username
+- Used to fetch flight plans from SimBrief
+- Must be a valid SimBrief username
+
+### Security Notes
+
+- The `config.js` file is ignored by git and will not be committed
+- Never commit sensitive configuration data to the repository
+- Each deployment environment should have its own `config.js` file
+- The `config.example.js` file serves as a template and should be kept updated
+
+### Deployment
+
+For production deployment:
+
+1. Copy `config.example.js` to `config.js`
+2. Update with production settings
+3. Ensure your web server serves the frontend application
+4. The configuration will be bundled into the application at build time
 
 ---
 
