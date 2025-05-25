@@ -155,6 +155,11 @@ $app->post('/tours', function (Request $request, Response $response, $args) use 
   $body = $request->getBody()->getContents();
   $data = json_decode($body, true);
 
+  // Ensure tour_id is uppercase
+  if (isset($data['tour_id'])) {
+    $data['tour_id'] = strtoupper($data['tour_id']);
+  }
+
   // Validate required fields
   if (empty($data['tour_id']) || empty($data['tour_description'])) {
     $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
@@ -303,12 +308,15 @@ $app->get('/legs[/{id}]', function (Request $request, Response $response, $args)
 $app->post('/legs', function (Request $request, Response $response, $args) use ($database) {
   $body = $request->getBody()->getContents();
   $data = json_decode($body, true);
-  // Ensure origin and destination are uppercase
+  // Ensure origin, destination, and aircraft are uppercase
   if (isset($data['origin'])) {
     $data['origin'] = strtoupper($data['origin']);
   }
   if (isset($data['destination'])) {
     $data['destination'] = strtoupper($data['destination']);
+  }
+  if (isset($data['aircraft'])) {
+    $data['aircraft'] = strtoupper($data['aircraft']);
   }
 
   // Validate required fields
@@ -339,12 +347,15 @@ $app->put('/legs/{id}', function (Request $request, Response $response, $args) u
   $id = $args['id'];
   $body = $request->getBody()->getContents();
   $data = json_decode($body, true);
-  // Ensure origin and destination are uppercase
+  // Ensure origin, destination, and aircraft are uppercase
   if (isset($data['origin'])) {
     $data['origin'] = strtoupper($data['origin']);
   }
   if (isset($data['destination'])) {
     $data['destination'] = strtoupper($data['destination']);
+  }
+  if (isset($data['aircraft'])) {
+    $data['aircraft'] = strtoupper($data['aircraft']);
   }
   // Validate required fields
   if (empty($data['tour_id']) || empty($data['origin']) || empty($data['destination'])) {
