@@ -239,11 +239,12 @@ watch(
 // Function to handle leg deletion with confirmation
 const confirmDeleteLeg = (leg) => {
   $q.dialog({
-    title: 'Confirm Deletion',
+    title: 'Confirm Leg Deletion',
     message: `Are you sure you want to delete the leg from ${leg.origin} to ${leg.destination}?`,
     cancel: {
       label: 'Cancel',
       flat: true,
+      color: 'white',
     },
     ok: {
       label: 'Delete',
