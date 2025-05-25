@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <table class="q-table q-table--dense bg-transparent text-white q-mt-sm" style="width: 100%">
+    <table class="bg-transparent text-white q-mt-sm" style="width: 100%">
       <tbody>
         <tr>
           <td class="text-left q-pa-xs text-grey-4" style="min-width: 120px">Tour ID</td>
