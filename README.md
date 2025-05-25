@@ -6,6 +6,7 @@ Personal Flight Simulator tour viewer with interactive world map visualization.
 
 - **World Map**: Visual tour display with colored routes and clickable flight legs
 - **Tour Management**: Add, edit, delete tours and flight legs (password protected)
+- **Tour Sharing**: Share tours via URLs (e.g., `/#/tour/tour3`)
 - **SimBrief Integration**: Import flight plans directly from SimBrief
 - **Aircraft Data**: Enriched with airport coordinates and aircraft information
 
