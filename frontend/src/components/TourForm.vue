@@ -34,8 +34,20 @@
 
         <!-- Action Buttons -->
         <div class="row q-gutter-sm justify-end q-mt-md">
-          <q-btn flat label="Cancel" color="grey" @click="$emit('cancel')" :disable="loading" />
-          <q-btn type="submit" label="Update Tour" color="primary" :loading="loading" />
+          <q-btn
+            class="bg-negative"
+            flat
+            label="Cancel"
+            @click="$emit('cancel')"
+            :disable="loading"
+          />
+          <q-btn
+            class="bg-positive"
+            type="submit"
+            label="Update Tour"
+            color="primary"
+            :loading="loading"
+          />
         </div>
       </q-form>
     </q-card-section>
