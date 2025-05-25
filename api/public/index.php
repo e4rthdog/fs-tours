@@ -84,15 +84,23 @@ $app->options('/{routes:.+}', function (Request $request, Response $response) {
     ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 });
 
-// Authentication middleware
-$authMiddleware = function ($request, $handler) {
+// Admin authentication middleware
+$adminAuthMiddleware = function ($request, $handler) {
   $auth = $request->getHeaderLine('Authorization');
-  if (empty($auth) || $auth !== 'Bearer your-secret-token') {
+
+  if (empty($auth) || !str_starts_with($auth, 'Bearer ')) {
     $response = new \Slim\Psr7\Response();
-    $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
-    return $response
-      ->withStatus(401)
-      ->withHeader('Content-Type', 'application/json');
+    $response->getBody()->write(json_encode(['error' => 'Admin authentication required']));
+    return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+  }
+
+  $token = substr($auth, 7); // Remove 'Bearer ' prefix
+  $adminPassword = $_ENV['ADMIN_PASSWORD'] ?? 'admin123';
+
+  if ($token !== $adminPassword) {
+    $response = new \Slim\Psr7\Response();
+    $response->getBody()->write(json_encode(['error' => 'Invalid admin credentials']));
+    return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
   }
 
   return $handler->handle($request);
@@ -155,7 +163,7 @@ $app->post('/tours', function (Request $request, Response $response, $args) use 
 
   $response->getBody()->write(json_encode(['success' => true, 'tour_id' => $data['tour_id']]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Update an existing tour
 $app->put('/tours/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -183,7 +191,7 @@ $app->put('/tours/{id}', function (Request $request, Response $response, $args) 
 
   $response->getBody()->write(json_encode(['success' => true]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Delete a tour
 $app->delete('/tours/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -204,7 +212,7 @@ $app->delete('/tours/{id}', function (Request $request, Response $response, $arg
 
   $response->getBody()->write(json_encode(['success' => true]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 
 // Get all legs for a specific tour
@@ -312,7 +320,7 @@ $app->post('/legs', function (Request $request, Response $response, $args) use (
 
   $response->getBody()->write(json_encode(['success' => true, 'id' => $database->id()]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Update an existing tour leg
 $app->put('/legs/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -355,7 +363,7 @@ $app->put('/legs/{id}', function (Request $request, Response $response, $args) u
   ]);
   $response->getBody()->write(json_encode(['success' => true]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Delete a tour leg by id
 $app->delete('/legs/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -372,30 +380,6 @@ $app->delete('/legs/{id}', function (Request $request, Response $response, $args
     'message' => 'Tour leg deleted successfully'
   ]));
   return $response->withHeader('Content-Type', 'application/json');
-});
-
-// Admin authentication endpoint
-$app->post('/admin/auth', function (Request $request, Response $response, $args) {
-  $data = json_decode($request->getBody(), true);
-  $password = $data['password'] ?? '';
-
-  // Get admin password from environment variable
-  $adminPassword = $_ENV['ADMIN_PASSWORD'] ?? 'admin123';
-
-  if ($password === $adminPassword) {
-    $response->getBody()->write(json_encode([
-      'success' => true,
-      'message' => 'Authentication successful'
-    ]));
-  } else {
-    $response->getBody()->write(json_encode([
-      'success' => false,
-      'message' => 'Invalid password'
-    ]));
-    return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
-  }
-
-  return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 $app->run();
