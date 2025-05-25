@@ -154,7 +154,7 @@ $app->get('/tours[/{id}]', function (Request $request, Response $response, $args
 $app->post('/tours', function (Request $request, Response $response, $args) use ($database) {
   $body = $request->getBody()->getContents();
   $data = json_decode($body, true);
-  error_log("Received data: " . print_r($data, true));
+
   // Validate required fields
   if (empty($data['tour_id']) || empty($data['tour_description'])) {
     $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
