@@ -283,10 +283,8 @@ export const useFsToursStore = defineStore('fstours', () => {
         origin: data.origin.icao_code || '',
         destination: data.destination.icao_code || '',
         aircraft: data.aircraft.icao_code || '',
-        route: data.atc?.route || '',
-        link: data.params?.request_id
-          ? `https://www.simbrief.com/ofp/flightplans/pdf/${data.params.request_id}.pdf`
-          : '',
+        route: data.api_params?.route || '',
+        link: data.params?.request_id ? data.files?.directory + data.files.pdf?.link : '',
         flightInfo: {
           blockTime: data.times?.est_block || '',
           fuel: data.fuel?.plan_ramp || '',
