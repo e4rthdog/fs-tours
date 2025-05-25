@@ -1,16 +1,17 @@
 <template>
   <q-card-section class="q-pa-sm bg-primary text-white">
     <div class="text-h6">
-      Edit Leg for tour: <span class="text-orange">{{ form.tour_id }}</span>
+      {{ props.isEdit ? 'Edit' : 'Add' }} Leg for tour:
+      <span class="text-orange">{{ form.tour_id }}</span>
     </div>
   </q-card-section>
   <q-card-section class="q-gutter-md">
-    <!-- SimBrief Integration -->
-    <div class="row q-gutter-sm q-mb-md">
+    <!-- SimBrief Integration - Only show in add mode -->
+    <div v-if="!props.isEdit" class="row q-gutter-sm q-mb-md">
       <q-btn
         color="secondary"
         icon="flight"
-        label="Import from SimBrief"
+        label="SimBrief"
         @click="importFromSimBrief"
         :loading="simbriefLoading"
         no-caps
@@ -54,6 +55,10 @@ import { useFsToursStore } from '../stores/fstours'
 const props = defineProps({
   modelValue: Object,
   loading: Boolean,
+  isEdit: {
+    type: Boolean,
+    default: false,
+  },
 })
 const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 

@@ -100,6 +100,7 @@
         <LegForm
           v-model="editDialog.form"
           :loading="store.loading"
+          :isEdit="true"
           @submit="submitEditLeg"
           @cancel="editDialog.show = false"
         />
