@@ -168,6 +168,36 @@ export const useFsToursStore = defineStore('fstours', () => {
     }
   }
 
+  const updateTour = async (tour) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const res = await fetch(`http://fs-tours-api.ddev.site/tours/${tour.tour_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tour_description: tour.tour_description,
+        }),
+        mode: 'cors',
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Failed to update tour' }))
+        throw new Error(errorData.message || 'Failed to update tour')
+      }
+
+      return await res.json()
+    } catch (err) {
+      error.value = err.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     legs,
     tours,
@@ -182,6 +212,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     deleteLeg,
     updateLeg,
     addLeg,
+    updateTour,
   }
 })
 

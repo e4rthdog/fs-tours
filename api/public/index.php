@@ -155,8 +155,8 @@ $app->post('/tours', function (Request $request, Response $response, $args) use 
 // Update an existing tour
 $app->put('/tours/{id}', function (Request $request, Response $response, $args) use ($database) {
   $id = $args['id'];
-  $data = $request->getParsedBody();
-
+  $body = $request->getBody()->getContents();
+  $data = json_decode($body, true);
   // Validate required fields
   if (empty($data['tour_description'])) {
     $response->getBody()->write(json_encode(['error' => 'Missing required fields']));

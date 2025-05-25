@@ -40,7 +40,15 @@
           <span class="text-body1 q-mr-sm">Tour actions:</span>
           <q-btn-group flat>
             <q-btn flat round dense icon="add" title="Create Tour" />
-            <q-btn flat round dense icon="edit" title="Edit Tour" />
+            <q-btn
+              flat
+              round
+              dense
+              icon="edit"
+              title="Edit Tour"
+              :disable="!store.selectedTour"
+              @click="openEditTourDialog"
+            />
             <q-btn flat round dense icon="delete" title="Delete Tour" />
           </q-btn-group>
           <q-separator vertical spaced class="q-mx-md" />
@@ -79,6 +87,18 @@
         />
       </q-card>
     </q-dialog>
+
+    <!-- Edit Tour Dialog -->
+    <q-dialog v-model="editTourDialog.show" persistent dark>
+      <q-card style="min-width: 400px; max-width: 90vw">
+        <TourForm
+          v-model="editTourDialog.form"
+          :loading="store.loading"
+          @submit="submitEditTour"
+          @cancel="editTourDialog.show = false"
+        />
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
@@ -87,6 +107,7 @@ import { ref, onMounted, computed, reactive } from 'vue'
 import { useFsToursStore } from 'stores/fstours'
 import { useQuasar } from 'quasar'
 import LegForm from 'components/LegForm.vue'
+import TourForm from 'components/TourForm.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
@@ -111,6 +132,14 @@ const addLegDialog = reactive({
     link2: '',
     link3: '',
     flight_date: '',
+  },
+})
+
+const editTourDialog = reactive({
+  show: false,
+  form: {
+    tour_id: '',
+    tour_description: '',
   },
 })
 
@@ -195,6 +224,44 @@ const submitAddLeg = async () => {
     $q.notify({
       type: 'negative',
       message: err.message || 'Failed to add leg',
+      position: 'top',
+      timeout: 3000,
+    })
+  } finally {
+    store.loading = false
+  }
+}
+
+const openEditTourDialog = () => {
+  const selectedTourData = store.tours.find((tour) => tour.tour_id === store.selectedTour)
+  if (selectedTourData) {
+    editTourDialog.form = {
+      tour_id: selectedTourData.tour_id,
+      tour_description: selectedTourData.tour_description,
+    }
+    editTourDialog.show = true
+  }
+}
+
+const submitEditTour = async () => {
+  try {
+    store.loading = true
+    await store.updateTour(editTourDialog.form)
+    editTourDialog.show = false
+
+    // Refresh tours after updating
+    await store.fetchTours()
+
+    $q.notify({
+      type: 'positive',
+      message: 'Tour updated successfully',
+      position: 'top',
+      timeout: 2000,
+    })
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: err.message || 'Failed to update tour',
       position: 'top',
       timeout: 3000,
     })
