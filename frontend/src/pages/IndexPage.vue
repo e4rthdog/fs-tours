@@ -154,32 +154,7 @@ const onMapReady = () => {
   if (map.value && map.value.leafletObject) {
     // Set initial zoom level
     currentZoom.value = map.value.leafletObject.getZoom()
-
-    // Add zoom event listener
-    map.value.leafletObject.on('zoomend', () => {
-      currentZoom.value = map.value.leafletObject.getZoom()
-      updateSequenceMarkersVisibility()
-    })
   }
-}
-
-// Function to update sequence markers visibility based on zoom level
-const updateSequenceMarkersVisibility = () => {
-  if (!map.value || !map.value.leafletObject) return
-
-  sequenceMarkers.value.forEach((marker) => {
-    if (currentZoom.value >= ZOOM_THRESHOLD) {
-      // Show markers at zoom threshold and above
-      if (!map.value.leafletObject.hasLayer(marker)) {
-        marker.addTo(map.value.leafletObject)
-      }
-    } else {
-      // Hide markers below zoom threshold
-      if (map.value.leafletObject.hasLayer(marker)) {
-        map.value.leafletObject.removeLayer(marker)
-      }
-    }
-  })
 }
 
 // Function to clear all sequence markers from map and array
@@ -266,11 +241,11 @@ const addSequenceMarker = (polyline, leg) => {
     polyline.openPopup()
   })
 
-  // Store marker in the array for visibility management
+  // Store marker in the array
   sequenceMarkers.value.push(marker)
 
-  // Add marker to the map only if zoom level is appropriate
-  if (map.value && map.value.leafletObject && currentZoom.value >= ZOOM_THRESHOLD) {
+  // Add marker to the map
+  if (map.value && map.value.leafletObject) {
     marker.addTo(map.value.leafletObject)
   }
 }
