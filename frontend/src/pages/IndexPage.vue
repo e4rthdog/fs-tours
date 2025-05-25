@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-none map-container">
-    <LMap ref="map" class="full-map" :zoom="3" :center="[40, 27]">
+    <LMap ref="map" class="full-map" :zoom="3" :center="[40, 27]" @ready="onMapReady">
       <LTileLayer
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         layer-type="base"
@@ -20,6 +20,12 @@
           <LTooltip permanent> {{ leg.origin }} - {{ leg.origin_name }} </LTooltip>
         </LCircleMarker>
 
+        <!-- Origin ICAO Label -->
+        <LMarker
+          :lat-lng="getLabelPosition(leg.origin_coords)"
+          :icon="createTextIcon(leg.origin)"
+        />
+
         <!-- Destination CircleMarker - Only rendered if it's not an origin of another leg -->
         <LCircleMarker
           v-if="!isLocationAnOrigin(leg.destination_coords, index)"
@@ -32,6 +38,13 @@
         >
           <LTooltip permanent> {{ leg.destination }} - {{ leg.destination_name }} </LTooltip>
         </LCircleMarker>
+
+        <!-- Destination ICAO Label - Only rendered if it's not an origin of another leg -->
+        <LMarker
+          v-if="!isLocationAnOrigin(leg.destination_coords, index)"
+          :lat-lng="getLabelPosition(leg.destination_coords)"
+          :icon="createTextIcon(leg.destination)"
+        />
 
         <!-- Polyline connecting Origin and Destination -->
         <LPolyline
@@ -104,6 +117,7 @@ import {
   LTooltip,
   LPopup,
   LCircleMarker,
+  LMarker,
 } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
@@ -117,6 +131,31 @@ const store = useFsToursStore()
 const $q = useQuasar()
 const route = useRoute()
 const map = ref(null)
+const currentZoom = ref(3) // Track current zoom level
+
+// Function to get label position based on zoom level
+const getLabelPosition = (coords) => {
+  // Calculate offset based on zoom level
+  // Higher zoom = smaller offset, lower zoom = larger offset
+  const baseOffset = 0.05 // Reduced from 0.1 to bring labels closer
+  const zoomFactor = Math.max(0.5, 6 - currentZoom.value) // Reduced factor range
+  const offset = baseOffset * zoomFactor
+
+  return [coords[0] + offset, coords[1] + offset]
+}
+
+// Handle map ready event
+const onMapReady = () => {
+  if (map.value && map.value.leafletObject) {
+    // Set initial zoom level
+    currentZoom.value = map.value.leafletObject.getZoom()
+
+    // Add zoom event listener
+    map.value.leafletObject.on('zoomend', () => {
+      currentZoom.value = map.value.leafletObject.getZoom()
+    })
+  }
+}
 
 // Create a custom arrow icon for the sequence number and route direction
 const createSequenceIcon = (sequence, originCoords, destCoords) => {
@@ -149,6 +188,16 @@ const calculateBearing = (start, end) => {
   const bearing = (Math.atan2(y, x) * 180) / Math.PI
   // Convert to 0-360 degrees and adjust for CSS rotation (add 180 to point from origin to destination, subtract 90 to align with arrow design)
   return (bearing + 270) % 360
+}
+
+// Create a text icon for airport ICAO codes
+const createTextIcon = (icaoCode) => {
+  return new L.DivIcon({
+    html: `<div class='icao-label'>${icaoCode}</div>`,
+    className: 'icao-icon',
+    iconSize: [40, 20],
+    iconAnchor: [0, 0],
+  })
 }
 
 // Function to check if a location is an origin in any leg
@@ -401,6 +450,25 @@ const submitEditLeg = async () => {
 :deep(.sequence-number) {
   display: inline-block;
   transform-origin: center;
+}
+
+/* Styling for ICAO code labels */
+:deep(.icao-icon) {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:deep(.icao-label) {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
 }
 
 /* Hide the default Leaflet popup wrapper */
