@@ -86,7 +86,7 @@
 
     <!-- Add Leg Dialog -->
     <q-dialog v-model="addLegDialog.show" persistent dark>
-      <q-card style="min-width: 400px; max-width: 90vw">
+      <q-card flat style="min-width: 400px; max-width: 90vw">
         <LegForm
           v-model="addLegDialog.form"
           :loading="store.loading"
@@ -98,7 +98,7 @@
 
     <!-- Edit Tour Dialog -->
     <q-dialog v-model="editTourDialog.show" persistent dark>
-      <q-card style="min-width: 400px; max-width: 90vw">
+      <q-card flat style="min-width: 400px; max-width: 90vw">
         <TourForm
           v-model="editTourDialog.form"
           :loading="store.loading"
@@ -110,7 +110,7 @@
 
     <!-- Add Tour Dialog -->
     <q-dialog v-model="addTourDialog.show" persistent dark>
-      <q-card style="min-width: 400px; max-width: 90vw">
+      <q-card flat style="min-width: 400px; max-width: 90vw">
         <AddTourForm
           v-model="addTourDialog.form"
           :loading="store.loading"
