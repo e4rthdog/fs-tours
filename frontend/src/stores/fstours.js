@@ -12,6 +12,7 @@ export const useFsToursStore = defineStore('fstours', () => {
   const error = ref(null)
   const isAdmin = ref(false)
   const adminToken = ref('')
+  const refreshSequenceMarkers = ref(0) // Trigger for sequence marker refresh
 
   async function fetchLegs() {
     loading.value = true
@@ -82,7 +83,9 @@ export const useFsToursStore = defineStore('fstours', () => {
         throw new Error(errorData.message || 'Failed to delete leg')
       }
 
-      return await res.json()
+      const result = await res.json()
+      triggerSequenceMarkerRefresh() // Trigger sequence marker refresh after successful delete
+      return result
     } catch (err) {
       error.value = err.message
       throw err
@@ -115,7 +118,9 @@ export const useFsToursStore = defineStore('fstours', () => {
         const errorData = await res.json().catch(() => ({ message: 'Failed to update leg' }))
         throw new Error(errorData.message || 'Failed to update leg')
       }
-      return await res.json()
+      const result = await res.json()
+      triggerSequenceMarkerRefresh() // Trigger sequence marker refresh after successful update
+      return result
     } catch (err) {
       error.value = err.message
       throw err
@@ -149,7 +154,9 @@ export const useFsToursStore = defineStore('fstours', () => {
         throw new Error(errorData.message || 'Failed to add leg')
       }
 
-      return await res.json()
+      const result = await res.json()
+      triggerSequenceMarkerRefresh() // Trigger sequence marker refresh after successful add
+      return result
     } catch (err) {
       error.value = err.message
       throw err
@@ -345,6 +352,10 @@ export const useFsToursStore = defineStore('fstours', () => {
     })
   }
 
+  function triggerSequenceMarkerRefresh() {
+    refreshSequenceMarkers.value++
+  }
+
   return {
     legs,
     tours,
@@ -352,6 +363,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading,
     error,
     isAdmin,
+    refreshSequenceMarkers,
     fetchLegs,
     fetchTourLegs,
     fetchTours,
@@ -366,6 +378,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     fetchSimbriefData,
     authenticateAdmin,
     logoutAdmin,
+    triggerSequenceMarkerRefresh,
   }
 })
 

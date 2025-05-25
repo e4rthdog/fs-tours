@@ -346,6 +346,15 @@ watch(
   },
 )
 
+// Watch for sequence marker refresh trigger from store
+watch(
+  () => store.refreshSequenceMarkers,
+  () => {
+    // Clear and refresh sequence markers when triggered
+    clearSequenceMarkers()
+  },
+)
+
 // Function to handle leg deletion with confirmation
 const confirmDeleteLeg = (leg) => {
   $q.dialog({
@@ -440,7 +449,9 @@ const submitEditLeg = async () => {
       ...editDialog.form,
     })
     editDialog.show = false
-    if (store.selectedTour) await store.fetchTourLegs(store.selectedTour)
+    if (store.selectedTour) {
+      await store.fetchTourLegs(store.selectedTour)
+    }
     $q.notify({ type: 'positive', message: 'Leg updated', position: 'top', timeout: 2000 })
   } catch (err) {
     $q.notify({
