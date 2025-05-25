@@ -22,6 +22,11 @@ Personal Flight Simulator tour viewer with interactive world map visualization.
 ```bash
 cd api
 composer install
+
+# Copy and configure environment
+cp .env.example .env
+# Edit .env and set ADMIN_PASSWORD=your_secure_password
+
 # Ensure db/fstours.db exists (copy from fstours.sample if needed)
 # Configure web server to serve public/index.php
 ```
@@ -52,7 +57,15 @@ export const config = {
 }
 ```
 
-**Note**: `config.js` is git-ignored. Use `config.example.js` as template.
+### Admin Authentication
+
+The application has password-protected admin functionality for CRUD operations:
+
+1. **API**: Set `ADMIN_PASSWORD` in `api/.env`
+2. **Frontend**: Click the admin toggle button (🔐) in the header
+3. **Login**: Enter the password to enable tour/leg management
+
+**Note**: Both `config.js` and `.env` are git-ignored. Use their `.example` files as templates.
 
 ## License
 

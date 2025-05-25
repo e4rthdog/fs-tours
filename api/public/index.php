@@ -10,6 +10,10 @@ use THSCD\AeroFetch\Services\AircraftService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+// Load environment variables
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->load();
+
 $database = new Medoo([
   'type' => 'sqlite',
   'database' => __DIR__ . '/../db/fstours.db'
@@ -375,8 +379,8 @@ $app->post('/admin/auth', function (Request $request, Response $response, $args)
   $data = json_decode($request->getBody(), true);
   $password = $data['password'] ?? '';
 
-  // Simple password authentication (in production, use environment variables or proper authentication)
-  $adminPassword = 'admin123'; // Change this to your desired admin password
+  // Get admin password from environment variable
+  $adminPassword = $_ENV['ADMIN_PASSWORD'] ?? 'admin123';
 
   if ($password === $adminPassword) {
     $response->getBody()->write(json_encode([
