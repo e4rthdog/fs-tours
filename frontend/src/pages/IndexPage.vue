@@ -62,8 +62,6 @@
             <LegInfo
               :leg="leg"
               :loading="store.loading"
-              :leg-details-to-rows="legDetailsToRows"
-              :leg-details-columns="legDetailsColumns"
               @edit="openEditDialog"
               @delete="confirmDeleteLeg"
             />
@@ -146,33 +144,6 @@ const createSequenceIcon = (sequence) => {
   })
 }
 
-// Table definition for leg details
-const legDetailsColumns = [
-  {
-    name: 'label',
-    field: 'label',
-    align: 'left',
-    label: 'Field',
-    style: 'width: 100px; font-weight: bold;',
-  },
-  { name: 'value', field: 'value', align: 'left', label: 'Value' },
-]
-
-// Convert leg data to row format for q-table
-const legDetailsToRows = (leg) => {
-  const rows = [
-    { label: 'Tour', value: leg.tour_description },
-    { label: 'Leg', value: leg.sequence },
-  ]
-
-  if (leg.aircraft_model) rows.push({ label: 'Aircraft', value: leg.aircraft_model })
-  if (leg.route) rows.push({ label: 'Route', value: leg.route })
-  if (leg.comments) rows.push({ label: 'Comments', value: leg.comments })
-  if (leg.flight_date) rows.push({ label: 'Date', value: formatDate(leg.flight_date) })
-
-  return rows
-}
-
 // Function to check if a location is an origin in any leg
 const isLocationAnOrigin = (coords, currentIndex) => {
   return store.legs.some(
@@ -181,17 +152,6 @@ const isLocationAnOrigin = (coords, currentIndex) => {
       leg.origin_coords[0] === coords[0] &&
       leg.origin_coords[1] === coords[1],
   )
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('el')
-  } catch {
-    return dateString
-  }
 }
 
 // Fix Leaflet's default icon paths

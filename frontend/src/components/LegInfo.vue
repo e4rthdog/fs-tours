@@ -16,18 +16,42 @@
       </div>
     </div>
 
-    <q-table
-      class="q-mt-sm bg-transparent text-white"
-      :rows="legDetailsToRows(leg)"
-      :columns="legDetailsColumns"
-      hide-bottom
-      hide-header
-      dense
-      flat
-      dark
-      :pagination="{ rowsPerPage: 0 }"
-      separator="horizontal"
-    />
+    <table class="q-table q-table--dense bg-transparent text-white q-mt-sm" style="width: 100%">
+      <tbody>
+        <tr>
+          <td class="text-left q-pa-xs text-grey-4" style="min-width: 120px">Tour ID</td>
+          <td class="text-left q-pa-xs">{{ leg.tour_id }}</td>
+        </tr>
+        <tr>
+          <td class="text-left q-pa-xs text-grey-4">Sequence</td>
+          <td class="text-left q-pa-xs">{{ leg.sequence }}</td>
+        </tr>
+        <tr>
+          <td class="text-left q-pa-xs text-grey-4">Origin</td>
+          <td class="text-left q-pa-xs">{{ leg.origin }}</td>
+        </tr>
+        <tr>
+          <td class="text-left q-pa-xs text-grey-4">Destination</td>
+          <td class="text-left q-pa-xs">{{ leg.destination }}</td>
+        </tr>
+        <tr>
+          <td class="text-left q-pa-xs text-grey-4">Aircraft</td>
+          <td class="text-left q-pa-xs">{{ leg.aircraft }}</td>
+        </tr>
+        <tr>
+          <td class="text-left q-pa-xs text-grey-4">Route</td>
+          <td class="text-left q-pa-xs">{{ leg.route }}</td>
+        </tr>
+        <tr>
+          <td class="text-left q-pa-xs text-grey-4">Date</td>
+          <td class="text-left q-pa-xs">{{ formatDate(leg.flight_date) }}</td>
+        </tr>
+        <tr v-if="leg.comments">
+          <td class="text-left q-pa-xs text-grey-4">Comments</td>
+          <td class="text-left q-pa-xs">{{ leg.comments }}</td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- Link buttons -->
     <div class="q-mt-sm q-gutter-sm row">
@@ -69,7 +93,16 @@
 defineProps({
   leg: Object,
   loading: Boolean,
-  legDetailsToRows: Function,
-  legDetailsColumns: Array,
 })
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('el')
+  } catch {
+    return dateString
+  }
+}
 </script>
