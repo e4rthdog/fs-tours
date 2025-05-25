@@ -20,8 +20,9 @@
           <LTooltip permanent> {{ leg.origin }} - {{ leg.origin_name }} </LTooltip>
         </LCircleMarker>
 
-        <!-- Origin ICAO Label -->
+        <!-- Origin ICAO Label - Only show at zoom level 7 and above -->
         <LMarker
+          v-if="currentZoom >= 7"
           :lat-lng="getLabelPosition(leg.origin_coords)"
           :icon="createTextIcon(leg.origin)"
         />
@@ -39,9 +40,9 @@
           <LTooltip permanent> {{ leg.destination }} - {{ leg.destination_name }} </LTooltip>
         </LCircleMarker>
 
-        <!-- Destination ICAO Label - Only rendered if it's not an origin of another leg -->
+        <!-- Destination ICAO Label - Only rendered if it's not an origin of another leg and zoom level is 7+ -->
         <LMarker
-          v-if="!isLocationAnOrigin(leg.destination_coords, index)"
+          v-if="!isLocationAnOrigin(leg.destination_coords, index) && currentZoom >= 7"
           :lat-lng="getLabelPosition(leg.destination_coords)"
           :icon="createTextIcon(leg.destination)"
         />
@@ -132,6 +133,7 @@ const $q = useQuasar()
 const route = useRoute()
 const map = ref(null)
 const currentZoom = ref(3) // Track current zoom level
+const sequenceMarkers = ref([]) // Track sequence markers for zoom-based visibility
 
 // Function to get label position based on zoom level
 const getLabelPosition = (coords) => {
@@ -153,8 +155,40 @@ const onMapReady = () => {
     // Add zoom event listener
     map.value.leafletObject.on('zoomend', () => {
       currentZoom.value = map.value.leafletObject.getZoom()
+      updateSequenceMarkersVisibility()
     })
   }
+}
+
+// Function to update sequence markers visibility based on zoom level
+const updateSequenceMarkersVisibility = () => {
+  if (!map.value || !map.value.leafletObject) return
+
+  sequenceMarkers.value.forEach((marker) => {
+    if (currentZoom.value >= 7) {
+      // Show markers at zoom level 7 and above
+      if (!map.value.leafletObject.hasLayer(marker)) {
+        marker.addTo(map.value.leafletObject)
+      }
+    } else {
+      // Hide markers below zoom level 7
+      if (map.value.leafletObject.hasLayer(marker)) {
+        map.value.leafletObject.removeLayer(marker)
+      }
+    }
+  })
+}
+
+// Function to clear all sequence markers from map and array
+const clearSequenceMarkers = () => {
+  if (map.value && map.value.leafletObject) {
+    sequenceMarkers.value.forEach((marker) => {
+      if (map.value.leafletObject.hasLayer(marker)) {
+        map.value.leafletObject.removeLayer(marker)
+      }
+    })
+  }
+  sequenceMarkers.value = []
 }
 
 // Create a custom arrow icon for the sequence number and route direction
@@ -229,8 +263,11 @@ const addSequenceMarker = (polyline, leg) => {
     polyline.openPopup()
   })
 
-  // Add marker to the map
-  if (map.value && map.value.leafletObject) {
+  // Store marker in the array for visibility management
+  sequenceMarkers.value.push(marker)
+
+  // Add marker to the map only if zoom level is appropriate
+  if (map.value && map.value.leafletObject && currentZoom.value >= 7) {
     marker.addTo(map.value.leafletObject)
   }
 }
@@ -280,6 +317,9 @@ watch(
   async (newTourId) => {
     if (newTourId) {
       try {
+        // Clear existing sequence markers from previous tour
+        clearSequenceMarkers()
+
         await store.fetchTourLegs(newTourId)
 
         // If legs are loaded and map is ready, zoom to the first leg
@@ -296,6 +336,9 @@ watch(
           message: `Error: ${err.message}`,
         })
       }
+    } else {
+      // If no tour selected, clear sequence markers
+      clearSequenceMarkers()
     }
   },
 )
