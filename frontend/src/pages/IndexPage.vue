@@ -141,10 +141,12 @@ const createSequenceIcon = (sequence, originCoords, destCoords) => {
   const bearing = calculateBearing(originCoords, destCoords)
 
   return new L.DivIcon({
-    html: `<div class='sequence-arrow' style='transform: rotate(${bearing}deg)'>${sequence}</div>`,
+    html: `<div class='sequence-arrow' style='transform: rotate(${bearing}deg)'>
+             <span class='sequence-number' style='transform: rotate(${-bearing}deg)'>${sequence}</span>
+           </div>`,
     className: 'sequence-icon',
-    iconSize: [32, 16],
-    iconAnchor: [16, 8],
+    iconSize: [40, 20],
+    iconAnchor: [20, 10],
   })
 }
 
@@ -354,29 +356,21 @@ const submitEditLeg = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 16px;
-  background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+  width: 40px;
+  height: 20px;
+  background: var(--q-secondary);
   color: white;
   font-weight: bold;
-  font-size: 10px;
+  font-size: 12px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   position: relative;
-  border-radius: 2px 8px 8px 2px;
   transform-origin: center;
+  clip-path: polygon(0 0, 75% 0, 100% 50%, 75% 100%, 0 100%);
 }
 
-:deep(.sequence-arrow::after) {
-  content: '';
-  position: absolute;
-  right: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 8px solid #1976d2;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
+:deep(.sequence-number) {
+  display: inline-block;
+  transform-origin: center;
 }
 
 /* Hide the default Leaflet popup wrapper */
