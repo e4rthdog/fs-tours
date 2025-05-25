@@ -10,6 +10,7 @@ export const useFsToursStore = defineStore('fstours', () => {
   const selectedTour = ref(null)
   const loading = ref(false)
   const error = ref(null)
+  const isAdmin = ref(false)
 
   async function fetchLegs() {
     loading.value = true
@@ -291,12 +292,48 @@ export const useFsToursStore = defineStore('fstours', () => {
     }
   }
 
+  async function authenticateAdmin(password) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ password }),
+        mode: 'cors',
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Authentication failed' }))
+        throw new Error(errorData.message || 'Authentication failed')
+      }
+
+      const result = await res.json()
+      isAdmin.value = result.success
+      return result
+    } catch (err) {
+      error.value = err.message
+      isAdmin.value = false
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function logoutAdmin() {
+    isAdmin.value = false
+  }
+
   return {
     legs,
     tours,
     selectedTour,
     loading,
     error,
+    isAdmin,
     fetchLegs,
     fetchTourLegs,
     fetchTours,
@@ -309,6 +346,8 @@ export const useFsToursStore = defineStore('fstours', () => {
     addTour,
     deleteTour,
     fetchSimbriefData,
+    authenticateAdmin,
+    logoutAdmin,
   }
 })
 

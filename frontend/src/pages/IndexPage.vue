@@ -62,6 +62,7 @@
             <LegInfo
               :leg="leg"
               :loading="store.loading"
+              :isAdmin="store.isAdmin"
               @edit="openEditDialog"
               @delete="confirmDeleteLeg"
             />

@@ -370,4 +370,28 @@ $app->delete('/legs/{id}', function (Request $request, Response $response, $args
   return $response->withHeader('Content-Type', 'application/json');
 });
 
+// Admin authentication endpoint
+$app->post('/admin/auth', function (Request $request, Response $response, $args) {
+  $data = json_decode($request->getBody(), true);
+  $password = $data['password'] ?? '';
+
+  // Simple password authentication (in production, use environment variables or proper authentication)
+  $adminPassword = 'admin123'; // Change this to your desired admin password
+
+  if ($password === $adminPassword) {
+    $response->getBody()->write(json_encode([
+      'success' => true,
+      'message' => 'Authentication successful'
+    ]));
+  } else {
+    $response->getBody()->write(json_encode([
+      'success' => false,
+      'message' => 'Invalid password'
+    ]));
+    return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+  }
+
+  return $response->withHeader('Content-Type', 'application/json');
+});
+
 $app->run();

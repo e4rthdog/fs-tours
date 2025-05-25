@@ -36,7 +36,17 @@
           @click="refreshData"
           title="Refresh tours data"
         />
-        <div class="q-ml-lg row items-center tour-actions-group">
+        <q-btn
+          flat
+          round
+          dense
+          :icon="store.isAdmin ? 'admin_panel_settings' : 'lock'"
+          :color="store.isAdmin ? 'positive' : 'grey'"
+          class="q-ml-sm"
+          @click="toggleAdmin"
+          :title="store.isAdmin ? 'Admin Mode (Click to logout)' : 'Admin Login'"
+        />
+        <div v-if="store.isAdmin" class="q-ml-lg row items-center tour-actions-group">
           <span class="text-body1 q-mr-sm">Tour actions:</span>
           <q-btn-group flat>
             <q-btn flat round dense icon="add" title="Create Tour" @click="openAddTourDialog" />
@@ -197,6 +207,49 @@ function updateLastUpdated() {
   const minutes = now.getUTCMinutes().toString().padStart(2, '0')
   const seconds = now.getUTCSeconds().toString().padStart(2, '0')
   lastUpdated.value = `${hours}:${minutes}:${seconds}Z`
+}
+
+function toggleAdmin() {
+  if (store.isAdmin) {
+    // Logout admin
+    store.logoutAdmin()
+    $q.notify({
+      type: 'positive',
+      message: 'Logged out of admin mode',
+      position: 'top',
+      timeout: 2000,
+    })
+  } else {
+    // Show password prompt
+    $q.dialog({
+      title: 'Admin Authentication',
+      message: 'Enter admin password:',
+      prompt: {
+        model: '',
+        type: 'password',
+      },
+      cancel: true,
+      persistent: true,
+      dark: true,
+    }).onOk(async (password) => {
+      try {
+        await store.authenticateAdmin(password)
+        $q.notify({
+          type: 'positive',
+          message: 'Admin authentication successful',
+          position: 'top',
+          timeout: 2000,
+        })
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: err.message || 'Authentication failed',
+          position: 'top',
+          timeout: 3000,
+        })
+      }
+    })
+  }
 }
 
 async function refreshData() {
