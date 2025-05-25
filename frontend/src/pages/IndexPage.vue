@@ -121,11 +121,13 @@ import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
 import { onMounted, ref, watch, reactive } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRoute } from 'vue-router'
 import LegForm from 'components/LegForm.vue'
 import LegInfo from 'components/LegInfo.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
+const route = useRoute()
 const map = ref(null)
 
 // Calculate the midpoint between two coordinates
@@ -186,6 +188,13 @@ L.Icon.Default.mergeOptions({
 })
 
 onMounted(async () => {
+  // Check if there's a tour parameter in the URL and no tour is selected yet
+  const tourIdFromUrl = route.params.tourId
+  if (tourIdFromUrl && !store.selectedTour) {
+    // Set the tour from URL parameter (this will trigger the watcher)
+    store.setSelectedTour(tourIdFromUrl)
+  }
+
   // If a tour is already selected, fetch its legs
   if (store.selectedTour) {
     try {
