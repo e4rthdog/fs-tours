@@ -67,6 +67,12 @@ function enrichLegData($legData)
 
 $app = AppFactory::create();
 
+// Set base path from environment
+$basePath = $_ENV['API_BASE_PATH'] ?? '';
+if (!empty($basePath)) {
+  $app->setBasePath($basePath);
+}
+
 // Add CORS headers to all routes
 $app->add(function ($request, $handler) {
   $response = $handler->handle($request);
