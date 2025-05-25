@@ -1,6 +1,6 @@
 <template>
-  <q-page class="q-pa-none" style="height: 100vh; width: 100vw; overflow: hidden">
-    <LMap ref="map" style="height: 100vh; width: 100vw" :zoom="3" :center="[40, 27]">
+  <q-page class="q-pa-none map-container">
+    <LMap ref="map" class="full-map" :zoom="3" :center="[40, 27]">
       <LTileLayer
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         layer-type="base"
@@ -344,6 +344,20 @@ const submitEditLeg = async () => {
 </script>
 
 <style scoped>
+/* Map container styling */
+.map-container {
+  position: relative;
+  height: calc(100vh - 100px); /* Subtract approximate header + footer height */
+  width: 100vw;
+  overflow: hidden;
+}
+
+.full-map {
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 400px;
+}
+
 /* Styling for sequence arrow markers */
 :deep(.sequence-icon) {
   background: none !important;
