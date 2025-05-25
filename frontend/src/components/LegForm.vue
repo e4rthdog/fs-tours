@@ -42,8 +42,8 @@
     </div>
   </q-card-section>
   <q-card-actions align="right">
-    <q-btn flat label="Cancel" color="grey" @click="$emit('cancel')" :disable="loading" />
-    <q-btn flat label="Save" color="positive" @click="onSubmit" :loading="loading" />
+    <q-btn flat label="Cancel" class="bg-negative" @click="$emit('cancel')" :disable="loading" />
+    <q-btn flat label="Save" class="bg-positive" @click="onSubmit" :loading="loading" />
   </q-card-actions>
 </template>
 

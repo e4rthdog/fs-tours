@@ -343,7 +343,8 @@ const confirmDeleteTour = () => {
   $q.dialog({
     flat: true,
     title: 'Confirm Tour Deletion',
-    message: `Are you sure you want to delete the tour "${tourDescription}"?\n\nThis action will permanently delete:\n• The tour itself\n• ALL flight legs associated with this tour\n\nThis action cannot be undone!`,
+    message: `Are you sure you want to delete the tour "<b>${tourDescription}</b>"?<br><br>This action will permanently delete:<br>&bull; The tour itself<br>&bull; ALL flight legs associated with this tour<br><br><b>This action cannot be undone!</b>`,
+    html: true,
     cancel: {
       label: 'Cancel',
       flat: true,
