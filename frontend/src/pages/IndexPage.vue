@@ -49,13 +49,13 @@
         >
         </LPolyline>
 
-        <!-- Sequence Number Marker at the midpoint of the polyline -->
+        <!-- Sequence Number Arrow Marker at the midpoint of the polyline -->
         <LMarker
           :lat-lng="calculateMidpoint(leg.origin_coords, leg.destination_coords)"
           :options="{
             interactive: true,
             zIndexOffset: 1000,
-            icon: createSequenceIcon(leg.sequence),
+            icon: createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords),
           }"
         >
           <LPopup>
@@ -135,14 +135,35 @@ const calculateMidpoint = (coord1, coord2) => {
   return [(coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2]
 }
 
-// Create a custom icon for the sequence number
-const createSequenceIcon = (sequence) => {
+// Create a custom arrow icon for the sequence number and route direction
+const createSequenceIcon = (sequence, originCoords, destCoords) => {
+  // Calculate the bearing/heading from origin to destination
+  const bearing = calculateBearing(originCoords, destCoords)
+
   return new L.DivIcon({
-    html: `<div class='sequence-number'>${sequence}</div>`,
+    html: `<div class='sequence-arrow' style='transform: rotate(${bearing}deg)'>${sequence}</div>`,
     className: 'sequence-icon',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconSize: [32, 16],
+    iconAnchor: [16, 8],
   })
+}
+
+// Calculate bearing between two coordinates (input: [lat, lng])
+const calculateBearing = (start, end) => {
+  const startLat = (start[0] * Math.PI) / 180
+  const startLng = (start[1] * Math.PI) / 180
+  const endLat = (end[0] * Math.PI) / 180
+  const endLng = (end[1] * Math.PI) / 180
+
+  const dLng = endLng - startLng
+
+  const y = Math.sin(dLng) * Math.cos(endLat)
+  const x =
+    Math.cos(startLat) * Math.sin(endLat) - Math.sin(startLat) * Math.cos(endLat) * Math.cos(dLng)
+
+  const bearing = (Math.atan2(y, x) * 180) / Math.PI
+  // Convert to 0-360 degrees and adjust for CSS rotation (add 180 to point from origin to destination, subtract 90 to align with arrow design)
+  return (bearing + 270) % 360
 }
 
 // Function to check if a location is an origin in any leg
@@ -322,43 +343,40 @@ const submitEditLeg = async () => {
 </script>
 
 <style scoped>
-/* Styling for sequence number markers */
+/* Styling for sequence arrow markers */
 :deep(.sequence-icon) {
   background: none !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-:deep(.sequence-number) {
+:deep(.sequence-arrow) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: white;
-  color: #1f6eb8;
+  width: 32px;
+  height: 16px;
+  background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+  color: white;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  position: relative;
+  border-radius: 2px 8px 8px 2px;
+  transform-origin: center;
 }
 
-.sequence-icon {
-  text-align: center;
-  line-height: 24px;
-  font-weight: bold;
-  color: #1f6eb8;
-}
-
-.sequence-number {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: white;
-  color: #1f6eb8;
-  font-weight: bold;
-  line-height: 24px;
+:deep(.sequence-arrow::after) {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid #1976d2;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
 }
 
 /* Hide the default Leaflet popup wrapper */
