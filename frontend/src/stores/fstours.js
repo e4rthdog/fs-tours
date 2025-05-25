@@ -253,11 +253,19 @@ export const useFsToursStore = defineStore('fstours', () => {
         throw new Error('No valid flight plan found for this username')
       }
 
+      // Build comments with distance and altitude info
+      const distance = data.general?.route_distance ? `${data.general.route_distance} nm` : ''
+      const altitude = data.general?.initial_altitude
+        ? `FL${Math.round(data.general.initial_altitude / 100)}`
+        : ''
+      const comments = [distance, altitude].filter(Boolean).join(', ')
+
       return {
         origin: data.origin.icao_code || '',
         destination: data.destination.icao_code || '',
         aircraft: data.aircraft.icao_code || '',
         route: data.general?.route || '',
+        comments: comments,
         link: data.params?.request_id ? data.files?.directory + data.files.pdf?.link : '',
       }
     } catch (error) {
