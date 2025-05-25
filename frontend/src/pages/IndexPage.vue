@@ -74,8 +74,8 @@
     <!-- No Tours Selected Message -->
     <div
       v-if="!store.selectedTour && !store.loading"
-      class="fixed-center z-max"
-      style="width: 400px"
+      class="fixed-center"
+      style="width: 400px; z-index: 1000"
     >
       <q-card flat bordered class="q-pa-md bg-dark text-white">
         <q-card-section>
@@ -87,10 +87,7 @@
     </div>
 
     <!-- Loading Overlay -->
-    <div
-      v-if="store.loading"
-      class="fixed-center bg-dark text-white q-pa-md rounded-borders shadow-4 z-max"
-    >
+    <div v-if="store.loading" class="fixed-center bg-dark text-white q-pa-md rounded-borders z-top">
       <q-spinner-dots color="primary" size="40px" />
       <div class="q-mt-sm text-center">{{ store.loading ? 'Processing...' : 'Loading...' }}</div>
     </div>
