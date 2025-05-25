@@ -61,9 +61,13 @@ export const config = {
 
 The application has password-protected admin functionality for CRUD operations:
 
-1. **API**: Set `ADMIN_PASSWORD` in `api/.env`
+1. **API Configuration**:
+   - Copy `api/.env.example` to `api/.env`
+   - Set a secure `ADMIN_PASSWORD` (required - no default fallback)
 2. **Frontend**: Click the admin toggle button (🔐) in the header
 3. **Login**: Enter the password to enable tour/leg management
+
+**Security Note**: The API requires `ADMIN_PASSWORD` to be explicitly set in the environment. If not configured, admin operations will fail with a 500 error.
 
 **Note**: Both `config.js` and `.env` are git-ignored. Use their `.example` files as templates.
 

@@ -95,7 +95,13 @@ $adminAuthMiddleware = function ($request, $handler) {
   }
 
   $token = substr($auth, 7); // Remove 'Bearer ' prefix
-  $adminPassword = $_ENV['ADMIN_PASSWORD'] ?? 'admin123';
+  $adminPassword = $_ENV['ADMIN_PASSWORD'] ?? null;
+
+  if (empty($adminPassword)) {
+    $response = new \Slim\Psr7\Response();
+    $response->getBody()->write(json_encode(['error' => 'Admin password not configured']));
+    return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+  }
 
   if ($token !== $adminPassword) {
     $response = new \Slim\Psr7\Response();
