@@ -110,21 +110,6 @@ async function importFromSimBrief() {
     if (!form.link1 && simbriefData.link) {
       form.link1 = simbriefData.link
     }
-
-    // Add flight info to comments if empty
-    if (!form.comments) {
-      const flightInfo = []
-      if (simbriefData.flightInfo.blockTime)
-        flightInfo.push(`Block time: ${simbriefData.flightInfo.blockTime}`)
-      if (simbriefData.flightInfo.fuel) flightInfo.push(`Fuel: ${simbriefData.flightInfo.fuel} lbs`)
-      if (simbriefData.flightInfo.aircraftName)
-        flightInfo.push(`Aircraft: ${simbriefData.flightInfo.aircraftName}`)
-
-      if (flightInfo.length > 0) {
-        form.comments = `SimBrief import: ${flightInfo.join(', ')}`
-      }
-    }
-
     Notify.create({
       type: 'positive',
       message: 'SimBrief data imported successfully!',
