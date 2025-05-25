@@ -49,7 +49,15 @@
               :disable="!store.selectedTour"
               @click="openEditTourDialog"
             />
-            <q-btn flat round dense icon="delete" title="Delete Tour" />
+            <q-btn
+              flat
+              round
+              dense
+              icon="delete"
+              title="Delete Tour"
+              :disable="!store.selectedTour"
+              @click="confirmDeleteTour"
+            />
           </q-btn-group>
           <q-separator vertical spaced class="q-mx-md" />
           <q-btn
@@ -324,6 +332,58 @@ const submitAddTour = async () => {
   } finally {
     store.loading = false
   }
+}
+
+const confirmDeleteTour = () => {
+  if (!store.selectedTour) return
+
+  const selectedTourData = store.tours.find((tour) => tour.tour_id === store.selectedTour)
+  const tourDescription = selectedTourData ? selectedTourData.tour_description : store.selectedTour
+
+  $q.dialog({
+    flat: true,
+    title: 'Confirm Tour Deletion',
+    message: `Are you sure you want to delete the tour "${tourDescription}"?\n\nThis action will permanently delete:\n• The tour itself\n• ALL flight legs associated with this tour\n\nThis action cannot be undone!`,
+    cancel: {
+      label: 'Cancel',
+      flat: true,
+      color: 'white',
+    },
+    ok: {
+      label: 'Delete Tour',
+      color: 'negative',
+    },
+    persistent: true,
+    dark: true,
+  }).onOk(async () => {
+    try {
+      store.loading = true
+      await store.deleteTour(store.selectedTour)
+
+      // Clear selected tour and legs after deletion
+      store.setSelectedTour(null)
+      store.clearLegs()
+
+      // Refresh tours list
+      await store.fetchTours()
+
+      $q.notify({
+        type: 'positive',
+        message: 'Tour and all associated legs deleted successfully',
+        position: 'top',
+        timeout: 3000,
+      })
+    } catch (err) {
+      $q.notify({
+        type: 'negative',
+        message: err.message || 'Failed to delete tour',
+        position: 'top',
+        timeout: 3000,
+      })
+    } finally {
+      store.loading = false
+    }
+  })
 }
 
 onMounted(async () => {

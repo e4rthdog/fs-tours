@@ -192,15 +192,10 @@ $app->delete('/tours/{id}', function (Request $request, Response $response, $arg
     return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
   }
 
-  // Check for legs associated with this tour
-  $legs = $database->has('tour_legs', ['tour_id' => $id]);
-  if ($legs) {
-    $response->getBody()->write(json_encode([
-      'error' => 'Cannot delete tour with existing legs. Delete the legs first.'
-    ]));
-    return $response->withStatus(409)->withHeader('Content-Type', 'application/json');
-  }
+  // First delete all legs associated with this tour
+  $database->delete('tour_legs', ['tour_id' => $id]);
 
+  // Then delete the tour
   $database->delete('tours', ['tour_id' => $id]);
 
   $response->getBody()->write(json_encode(['success' => true]));
