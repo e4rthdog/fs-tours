@@ -9,7 +9,7 @@
 
 export const config = {
   // API Base URL - Update this to match your API server
-  apiBaseUrl: 'https://fs-tours-api.ddev.site',
+  apiBaseUrl: 'http://fs-tours-api.ddev.site',
 
   // SimBrief Username - Your SimBrief account username
   simbriefUsername: 'your-username-here',

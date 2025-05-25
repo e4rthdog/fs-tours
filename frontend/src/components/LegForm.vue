@@ -18,16 +18,46 @@
       />
     </div>
 
-    <q-input v-model="form.origin" label="Origin ICAO" dense outlined required />
-    <q-input v-model="form.destination" label="Destination ICAO" dense outlined required />
-    <q-input v-model="form.aircraft" label="Aircraft ICAO" dense outlined />
-    <q-input v-model="form.route" label="Route" dense outlined type="textarea" :rows="2" />
+    <q-input
+      v-model="form.origin"
+      label="Origin ICAO"
+      dense
+      outlined
+      required
+      :rules="[(val) => (val && val.length > 0) || 'Origin is required']"
+    />
+    <q-input
+      v-model="form.destination"
+      label="Destination ICAO"
+      dense
+      outlined
+      required
+      :rules="[(val) => (val && val.length > 0) || 'Destination is required']"
+    />
+    <q-input
+      v-model="form.aircraft"
+      label="Aircraft ICAO"
+      dense
+      outlined
+      required
+      :rules="[(val) => (val && val.length > 0) || 'Aircraft is required']"
+    />
+    <q-input
+      v-model="form.route"
+      label="Route"
+      dense
+      outlined
+      required
+      type="textarea"
+      :rows="2"
+      :rules="[(val) => (val && val.length > 0) || 'Route is required']"
+    />
     <q-input v-model="form.comments" label="Comments" dense outlined type="textarea" :rows="2" />
     <q-input v-model="form.link1" label="Link 1" dense outlined />
     <q-input v-model="form.link2" label="Link 2" dense outlined />
     <q-input v-model="form.link3" label="Link 3" dense outlined />
     <div class="column">
-      <label class="text-subtitle2 q-mb-xs">Flight Date</label>
+      <label class="text-subtitle2 q-mb-xs">Flight Date *</label>
       <q-date
         v-model="form.flight_date"
         mask="YYYY-MM-DD"
@@ -38,6 +68,7 @@
         minimal
         landscape
         class="q-mt-sm"
+        :rules="[(val) => (val && val.length > 0) || 'Flight date is required']"
       />
     </div>
   </q-card-section>
@@ -127,6 +158,28 @@ async function importFromSimBrief() {
 }
 
 function onSubmit() {
+  // Validate all required fields
+  const requiredFields = [
+    { field: 'origin', name: 'Origin ICAO' },
+    { field: 'destination', name: 'Destination ICAO' },
+    { field: 'aircraft', name: 'Aircraft ICAO' },
+    { field: 'route', name: 'Route' },
+    { field: 'flight_date', name: 'Flight Date' },
+  ]
+
+  const missingFields = requiredFields.filter(
+    ({ field }) => !form[field] || form[field].trim() === '',
+  )
+
+  if (missingFields.length > 0) {
+    Notify.create({
+      type: 'negative',
+      message: `Please fill all required fields: ${missingFields.map((f) => f.name).join(', ')}`,
+      position: 'top',
+    })
+    return
+  }
+
   emit('submit')
 }
 </script>

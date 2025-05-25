@@ -82,7 +82,8 @@ export const useFsToursStore = defineStore('fstours', () => {
         throw new Error(errorData.message || 'Failed to delete leg')
       }
 
-      return await res.json()
+      const result = await res.json()
+      return result
     } catch (err) {
       error.value = err.message
       throw err
@@ -115,7 +116,8 @@ export const useFsToursStore = defineStore('fstours', () => {
         const errorData = await res.json().catch(() => ({ message: 'Failed to update leg' }))
         throw new Error(errorData.message || 'Failed to update leg')
       }
-      return await res.json()
+      const result = await res.json()
+      return result
     } catch (err) {
       error.value = err.message
       throw err
@@ -149,7 +151,8 @@ export const useFsToursStore = defineStore('fstours', () => {
         throw new Error(errorData.message || 'Failed to add leg')
       }
 
-      return await res.json()
+      const result = await res.json()
+      return result
     } catch (err) {
       error.value = err.message
       throw err

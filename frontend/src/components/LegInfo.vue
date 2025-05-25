@@ -1,19 +1,22 @@
 <template>
   <q-card flat class="bg-dark text-white q-pa-sm" style="min-width: 320px; max-width: 95vw">
     <q-card-section class="q-pa-sm bg-primary text-white">
-      <div class="text-h6">
+      <div class="text-h6 flex items-center justify-between">
         <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
-        <div v-if="isAdmin" class="q-gutter-x-sm">
-          <q-btn flat round dense icon="edit" title="Edit Leg" @click="$emit('edit', leg)" />
-          <q-btn
-            flat
-            round
-            dense
-            icon="delete"
-            title="Delete Leg"
-            @click="$emit('delete', leg)"
-            :loading="loading"
-          />
+        <div class="q-gutter-x-sm flex items-center">
+          <div v-if="isAdmin" class="q-gutter-x-sm">
+            <q-btn flat round dense icon="edit" title="Edit Leg" @click="$emit('edit', leg)" />
+            <q-btn
+              flat
+              round
+              dense
+              icon="delete"
+              title="Delete Leg"
+              @click="$emit('delete', leg)"
+              :loading="loading"
+            />
+          </div>
+          <q-btn flat round dense icon="close" title="Close" @click="$emit('close')" />
         </div>
       </div>
     </q-card-section>
@@ -97,6 +100,8 @@ defineProps({
   loading: Boolean,
   isAdmin: Boolean,
 })
+
+defineEmits(['edit', 'delete', 'close'])
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
