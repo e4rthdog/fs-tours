@@ -12,7 +12,6 @@ export const useFsToursStore = defineStore('fstours', () => {
   const error = ref(null)
   const isAdmin = ref(false)
   const adminToken = ref('')
-  const refreshSequenceMarkers = ref(0) // Trigger for sequence marker refresh
 
   async function fetchLegs() {
     loading.value = true
@@ -84,7 +83,6 @@ export const useFsToursStore = defineStore('fstours', () => {
       }
 
       const result = await res.json()
-      triggerSequenceMarkerRefresh() // Trigger sequence marker refresh after successful delete
       return result
     } catch (err) {
       error.value = err.message
@@ -119,7 +117,6 @@ export const useFsToursStore = defineStore('fstours', () => {
         throw new Error(errorData.message || 'Failed to update leg')
       }
       const result = await res.json()
-      triggerSequenceMarkerRefresh() // Trigger sequence marker refresh after successful update
       return result
     } catch (err) {
       error.value = err.message
@@ -155,7 +152,6 @@ export const useFsToursStore = defineStore('fstours', () => {
       }
 
       const result = await res.json()
-      triggerSequenceMarkerRefresh() // Trigger sequence marker refresh after successful add
       return result
     } catch (err) {
       error.value = err.message
@@ -352,10 +348,6 @@ export const useFsToursStore = defineStore('fstours', () => {
     })
   }
 
-  function triggerSequenceMarkerRefresh() {
-    refreshSequenceMarkers.value++
-  }
-
   return {
     legs,
     tours,
@@ -363,7 +355,6 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading,
     error,
     isAdmin,
-    refreshSequenceMarkers,
     fetchLegs,
     fetchTourLegs,
     fetchTours,
@@ -378,7 +369,6 @@ export const useFsToursStore = defineStore('fstours', () => {
     fetchSimbriefData,
     authenticateAdmin,
     logoutAdmin,
-    triggerSequenceMarkerRefresh,
   }
 })
 

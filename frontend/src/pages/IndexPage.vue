@@ -59,7 +59,6 @@
             bubblingMouseEvents: false,
             opacity: 0.9,
           }"
-          @ready="(polylineRef) => addSequenceMarker(polylineRef, leg)"
         >
           <LPopup>
             <LegInfo
@@ -71,6 +70,13 @@
             />
           </LPopup>
         </LPolyline>
+
+        <!-- Sequence Marker at polyline center -->
+        <LMarker
+          :lat-lng="getPolylineCenter(leg.origin_coords, leg.destination_coords)"
+          :icon="createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords)"
+          @click="openLegPopup(leg)"
+        />
       </template>
     </LMap>
 
@@ -94,6 +100,20 @@
       <q-spinner-dots color="primary" size="40px" />
       <div class="q-mt-sm text-center">{{ store.loading ? 'Processing...' : 'Loading...' }}</div>
     </div>
+
+    <!-- Leg Info Dialog -->
+    <q-dialog v-model="legInfoDialog.show" dark>
+      <q-card flat style="min-width: 400px; max-width: 90vw">
+        <LegInfo
+          :leg="legInfoDialog.leg"
+          :loading="store.loading"
+          :isAdmin="store.isAdmin"
+          @edit="openEditDialogFromInfo"
+          @delete="confirmDeleteLegFromInfo"
+          @close="legInfoDialog.show = false"
+        />
+      </q-card>
+    </q-dialog>
 
     <!-- Edit Leg Dialog -->
     <q-dialog v-model="editDialog.show" persistent dark>
@@ -133,7 +153,6 @@ const $q = useQuasar()
 const route = useRoute()
 const map = ref(null)
 const currentZoom = ref(3) // Track current zoom level
-const sequenceMarkers = ref([]) // Track sequence markers for zoom-based visibility
 
 // Configurable zoom level threshold for showing labels and sequence markers
 const ZOOM_THRESHOLD = 6
@@ -155,18 +174,6 @@ const onMapReady = () => {
     // Set initial zoom level
     currentZoom.value = map.value.leafletObject.getZoom()
   }
-}
-
-// Function to clear all sequence markers from map and array
-const clearSequenceMarkers = () => {
-  if (map.value && map.value.leafletObject) {
-    sequenceMarkers.value.forEach((marker) => {
-      if (map.value.leafletObject.hasLayer(marker)) {
-        map.value.leafletObject.removeLayer(marker)
-      }
-    })
-  }
-  sequenceMarkers.value = []
 }
 
 // Create a custom arrow icon for the sequence number and route direction
@@ -222,32 +229,28 @@ const isLocationAnOrigin = (coords, currentIndex) => {
   )
 }
 
-// Function to add sequence marker using polyline center
-const addSequenceMarker = (polyline, leg) => {
-  if (!polyline || !leg) return
+// Function to calculate the center point of a polyline
+const getPolylineCenter = (startCoords, endCoords) => {
+  const lat = (startCoords[0] + endCoords[0]) / 2
+  const lng = (startCoords[1] + endCoords[1]) / 2
+  return [lat, lng]
+}
 
-  // Get the center point of the polyline
-  const center = polyline.getCenter()
+// Function to open leg popup programmatically
+const openLegPopup = (leg) => {
+  legInfoDialog.leg = leg
+  legInfoDialog.show = true
+}
 
-  // Create the marker at the polyline center
-  const marker = L.marker([center.lat, center.lng], {
-    icon: createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords),
-    interactive: true,
-    zIndexOffset: 1000,
-  })
+// Helper functions for leg info dialog actions
+const openEditDialogFromInfo = (leg) => {
+  legInfoDialog.show = false
+  openEditDialog(leg)
+}
 
-  // When marker is clicked, trigger the polyline popup
-  marker.on('click', () => {
-    polyline.openPopup()
-  })
-
-  // Store marker in the array
-  sequenceMarkers.value.push(marker)
-
-  // Add marker to the map
-  if (map.value && map.value.leafletObject) {
-    marker.addTo(map.value.leafletObject)
-  }
+const confirmDeleteLegFromInfo = (leg) => {
+  legInfoDialog.show = false
+  confirmDeleteLeg(leg)
 }
 
 // Fix Leaflet's default icon paths
@@ -295,9 +298,6 @@ watch(
   async (newTourId) => {
     if (newTourId) {
       try {
-        // Clear existing sequence markers from previous tour
-        clearSequenceMarkers()
-
         await store.fetchTourLegs(newTourId)
 
         // If legs are loaded and map is ready, zoom to the first leg
@@ -314,19 +314,7 @@ watch(
           message: `Error: ${err.message}`,
         })
       }
-    } else {
-      // If no tour selected, clear sequence markers
-      clearSequenceMarkers()
     }
-  },
-)
-
-// Watch for sequence marker refresh trigger from store
-watch(
-  () => store.refreshSequenceMarkers,
-  () => {
-    // Clear and refresh sequence markers when triggered
-    clearSequenceMarkers()
   },
 )
 
@@ -381,6 +369,11 @@ const confirmDeleteLeg = (leg) => {
     }
   })
 }
+
+const legInfoDialog = reactive({
+  show: false,
+  leg: null,
+})
 
 const editDialog = reactive({
   show: false,
