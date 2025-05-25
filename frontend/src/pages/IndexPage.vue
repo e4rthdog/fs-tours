@@ -20,9 +20,9 @@
           <LTooltip permanent> {{ leg.origin }} - {{ leg.origin_name }} </LTooltip>
         </LCircleMarker>
 
-        <!-- Origin ICAO Label - Only show at zoom level 7 and above -->
+        <!-- Origin ICAO Label - Only show at zoom threshold and above -->
         <LMarker
-          v-if="currentZoom >= 7"
+          v-if="currentZoom >= ZOOM_THRESHOLD"
           :lat-lng="getLabelPosition(leg.origin_coords)"
           :icon="createTextIcon(leg.origin)"
         />
@@ -40,9 +40,9 @@
           <LTooltip permanent> {{ leg.destination }} - {{ leg.destination_name }} </LTooltip>
         </LCircleMarker>
 
-        <!-- Destination ICAO Label - Only rendered if it's not an origin of another leg and zoom level is 7+ -->
+        <!-- Destination ICAO Label - Only rendered if it's not an origin of another leg and zoom threshold+ -->
         <LMarker
-          v-if="!isLocationAnOrigin(leg.destination_coords, index) && currentZoom >= 7"
+          v-if="!isLocationAnOrigin(leg.destination_coords, index) && currentZoom >= ZOOM_THRESHOLD"
           :lat-lng="getLabelPosition(leg.destination_coords)"
           :icon="createTextIcon(leg.destination)"
         />
@@ -135,6 +135,9 @@ const map = ref(null)
 const currentZoom = ref(3) // Track current zoom level
 const sequenceMarkers = ref([]) // Track sequence markers for zoom-based visibility
 
+// Configurable zoom level threshold for showing labels and sequence markers
+const ZOOM_THRESHOLD = 6
+
 // Function to get label position based on zoom level
 const getLabelPosition = (coords) => {
   // Calculate offset based on zoom level
@@ -165,13 +168,13 @@ const updateSequenceMarkersVisibility = () => {
   if (!map.value || !map.value.leafletObject) return
 
   sequenceMarkers.value.forEach((marker) => {
-    if (currentZoom.value >= 7) {
-      // Show markers at zoom level 7 and above
+    if (currentZoom.value >= ZOOM_THRESHOLD) {
+      // Show markers at zoom threshold and above
       if (!map.value.leafletObject.hasLayer(marker)) {
         marker.addTo(map.value.leafletObject)
       }
     } else {
-      // Hide markers below zoom level 7
+      // Hide markers below zoom threshold
       if (map.value.leafletObject.hasLayer(marker)) {
         map.value.leafletObject.removeLayer(marker)
       }
@@ -267,7 +270,7 @@ const addSequenceMarker = (polyline, leg) => {
   sequenceMarkers.value.push(marker)
 
   // Add marker to the map only if zoom level is appropriate
-  if (map.value && map.value.leafletObject && currentZoom.value >= 7) {
+  if (map.value && map.value.leafletObject && currentZoom.value >= ZOOM_THRESHOLD) {
     marker.addTo(map.value.leafletObject)
   }
 }
