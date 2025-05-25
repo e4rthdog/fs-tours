@@ -1,14 +1,59 @@
 # fs-tours
 
-## Overview
+Personal Flight Simulator tour viewer with interactive world map visualization.
 
-fs-tours is a personal Flight Simulator tour viewer. The application allows users to view, add, edit, and delete tours and their associated flight legs. The main page displays a world map with tours and legs visualized, and each leg is clickable for detailed information.
+## Features
 
-## API
+- **World Map**: Visual tour display with colored routes and clickable flight legs
+- **Tour Management**: Add, edit, delete tours and flight legs (password protected)
+- **SimBrief Integration**: Import flight plans directly from SimBrief
+- **Aircraft Data**: Enriched with airport coordinates and aircraft information
 
-- Built with PHP using the Slim framework and Medoo for database access.
-- Uses a SQLite database for storing tours and legs.
-- Integrates the [AeroFetch](https://github.com/tiagohillebrandt/aerofetch) library to fetch aircraft and airport data.
-- Provides endpoints to:
-  - Fetch all tours or a specific tour.
-  - Fetch all legs or a specific leg, including enriched data such as airport coordinates and aircraft model.
+## Tech Stack
+
+- **Backend**: PHP (Slim framework + Medoo) with SQLite database
+- **Frontend**: Vue 3 + Quasar + Pinia
+- **Data**: [AeroFetch](https://github.com/tiagohillebrandt/aerofetch) for aircraft/airport data
+
+## Setup
+
+### API
+
+```bash
+cd api
+composer install
+# Ensure db/fstours.db exists (copy from fstours.sample if needed)
+# Configure web server to serve public/index.php
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+
+# Copy and configure settings
+cd src/config
+cp config.example.js config.js
+# Edit config.js with your API URL and SimBrief username
+
+# Start development server
+quasar dev
+```
+
+## Configuration
+
+Edit `frontend/src/config/config.js`:
+
+```javascript
+export const config = {
+	apiBaseUrl: 'https://your-api-domain.com',
+	simbriefUsername: 'your-simbrief-username',
+}
+```
+
+**Note**: `config.js` is git-ignored. Use `config.example.js` as template.
+
+## License
+
+MIT
