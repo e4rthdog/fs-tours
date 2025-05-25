@@ -1,7 +1,8 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { ref } from 'vue'
+import { config } from '../config/config.js'
 
-const API_BASE_URL = 'http://fs-tours-api.ddev.site'
+const API_BASE_URL = config.apiBaseUrl
 
 export const useFsToursStore = defineStore('fstours', () => {
   const legs = ref([])
@@ -260,7 +261,7 @@ export const useFsToursStore = defineStore('fstours', () => {
   }
 
   async function fetchSimbriefData() {
-    const username = 'earthdog'
+    const username = config.simbriefUsername
 
     try {
       const response = await fetch(
