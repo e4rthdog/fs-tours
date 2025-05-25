@@ -67,12 +67,18 @@ function enrichLegData($legData)
 
 $app = AppFactory::create();
 
+// Set base path from environment
+$basePath = $_ENV['API_BASE_PATH'] ?? '';
+if (!empty($basePath)) {
+  $app->setBasePath($basePath);
+}
+
 // Add CORS headers to all routes
 $app->add(function ($request, $handler) {
   $response = $handler->handle($request);
   return $response
     ->withHeader('Access-Control-Allow-Origin', '*')
-    ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
     ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 });
 
@@ -148,7 +154,12 @@ $app->get('/tours[/{id}]', function (Request $request, Response $response, $args
 $app->post('/tours', function (Request $request, Response $response, $args) use ($database) {
   $body = $request->getBody()->getContents();
   $data = json_decode($body, true);
-  error_log("Received data: " . print_r($data, true));
+
+  // Ensure tour_id is uppercase
+  if (isset($data['tour_id'])) {
+    $data['tour_id'] = strtoupper($data['tour_id']);
+  }
+
   // Validate required fields
   if (empty($data['tour_id']) || empty($data['tour_description'])) {
     $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
@@ -297,12 +308,15 @@ $app->get('/legs[/{id}]', function (Request $request, Response $response, $args)
 $app->post('/legs', function (Request $request, Response $response, $args) use ($database) {
   $body = $request->getBody()->getContents();
   $data = json_decode($body, true);
-  // Ensure origin and destination are uppercase
+  // Ensure origin, destination, and aircraft are uppercase
   if (isset($data['origin'])) {
     $data['origin'] = strtoupper($data['origin']);
   }
   if (isset($data['destination'])) {
     $data['destination'] = strtoupper($data['destination']);
+  }
+  if (isset($data['aircraft'])) {
+    $data['aircraft'] = strtoupper($data['aircraft']);
   }
 
   // Validate required fields
@@ -333,12 +347,15 @@ $app->put('/legs/{id}', function (Request $request, Response $response, $args) u
   $id = $args['id'];
   $body = $request->getBody()->getContents();
   $data = json_decode($body, true);
-  // Ensure origin and destination are uppercase
+  // Ensure origin, destination, and aircraft are uppercase
   if (isset($data['origin'])) {
     $data['origin'] = strtoupper($data['origin']);
   }
   if (isset($data['destination'])) {
     $data['destination'] = strtoupper($data['destination']);
+  }
+  if (isset($data['aircraft'])) {
+    $data['aircraft'] = strtoupper($data['aircraft']);
   }
   // Validate required fields
   if (empty($data['tour_id']) || empty($data['origin']) || empty($data['destination'])) {

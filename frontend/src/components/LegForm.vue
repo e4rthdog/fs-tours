@@ -105,6 +105,7 @@ async function importFromSimBrief() {
     form.destination = simbriefData.destination
     form.aircraft = simbriefData.aircraft
     form.route = simbriefData.route
+    form.comments = simbriefData.comments
 
     // Add SimBrief link to first link field if empty
     if (!form.link1 && simbriefData.link) {

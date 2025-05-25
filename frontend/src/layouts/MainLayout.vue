@@ -467,12 +467,9 @@ const confirmDeleteTour = () => {
 function shareCurrentTour() {
   if (!store.selectedTour) return
 
-  const baseUrl = window.location.origin
-  const shareUrl = `${baseUrl}/#/tour/${store.selectedTour}`
-
-  // Copy to clipboard
+  // Copy current URL directly - it already contains the correct tour
   navigator.clipboard
-    .writeText(shareUrl)
+    .writeText(window.location.href)
     .then(() => {
       $q.notify({
         type: 'positive',
@@ -487,7 +484,7 @@ function shareCurrentTour() {
         title: 'Share Tour',
         message: 'Copy this URL to share the current tour:',
         prompt: {
-          model: shareUrl,
+          model: window.location.href,
           readonly: true,
         },
         ok: 'Close',
