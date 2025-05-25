@@ -35,6 +35,7 @@
 
         <!-- Polyline connecting Origin and Destination -->
         <LPolyline
+          ref="polyline"
           :lat-lngs="[leg.origin_coords, leg.destination_coords]"
           :weight="3"
           color="#1f6eb8"
@@ -44,17 +45,7 @@
             bubblingMouseEvents: false,
             opacity: 0.9,
           }"
-        >
-        </LPolyline>
-
-        <!-- Sequence Number Arrow Marker at the midpoint of the polyline -->
-        <LMarker
-          :lat-lng="calculateMidpoint(leg.origin_coords, leg.destination_coords)"
-          :options="{
-            interactive: true,
-            zIndexOffset: 1000,
-            icon: createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords),
-          }"
+          @ready="(polylineRef) => addSequenceMarker(polylineRef, leg)"
         >
           <LPopup>
             <LegInfo
@@ -65,7 +56,7 @@
               @delete="confirmDeleteLeg"
             />
           </LPopup>
-        </LMarker>
+        </LPolyline>
       </template>
     </LMap>
 
@@ -110,7 +101,6 @@ import {
   LMap,
   LTileLayer,
   LPolyline,
-  LMarker,
   LTooltip,
   LPopup,
   LCircleMarker,
@@ -127,11 +117,6 @@ const store = useFsToursStore()
 const $q = useQuasar()
 const route = useRoute()
 const map = ref(null)
-
-// Calculate the midpoint between two coordinates
-const calculateMidpoint = (coord1, coord2) => {
-  return [(coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2]
-}
 
 // Create a custom arrow icon for the sequence number and route direction
 const createSequenceIcon = (sequence, originCoords, destCoords) => {
@@ -174,6 +159,31 @@ const isLocationAnOrigin = (coords, currentIndex) => {
       leg.origin_coords[0] === coords[0] &&
       leg.origin_coords[1] === coords[1],
   )
+}
+
+// Function to add sequence marker using polyline center
+const addSequenceMarker = (polyline, leg) => {
+  if (!polyline || !leg) return
+
+  // Get the center point of the polyline
+  const center = polyline.getCenter()
+
+  // Create the marker at the polyline center
+  const marker = L.marker([center.lat, center.lng], {
+    icon: createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords),
+    interactive: true,
+    zIndexOffset: 1000,
+  })
+
+  // When marker is clicked, trigger the polyline popup
+  marker.on('click', () => {
+    polyline.openPopup()
+  })
+
+  // Add marker to the map
+  if (map.value && map.value.leafletObject) {
+    marker.addTo(map.value.leafletObject)
+  }
 }
 
 // Fix Leaflet's default icon paths
