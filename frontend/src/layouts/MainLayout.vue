@@ -36,7 +36,27 @@
           @click="refreshData"
           title="Refresh tours data"
         />
-        <div class="q-ml-lg row items-center tour-actions-group">
+        <q-btn
+          flat
+          round
+          dense
+          icon="share"
+          class="q-ml-sm"
+          :disable="!store.selectedTour"
+          @click="shareCurrentTour"
+          title="Share current tour"
+        />
+        <q-btn
+          flat
+          round
+          dense
+          :icon="store.isAdmin ? 'admin_panel_settings' : 'lock'"
+          :color="store.isAdmin ? 'positive' : 'grey'"
+          class="q-ml-sm"
+          @click="toggleAdmin"
+          :title="store.isAdmin ? 'Admin Mode (Click to logout)' : 'Admin Login'"
+        />
+        <div v-if="store.isAdmin" class="q-ml-lg row items-center tour-actions-group">
           <span class="text-body1 q-mr-sm">Tour actions:</span>
           <q-btn-group flat>
             <q-btn flat round dense icon="add" title="Create Tour" @click="openAddTourDialog" />
@@ -126,12 +146,15 @@
 import { ref, onMounted, computed, reactive } from 'vue'
 import { useFsToursStore } from 'stores/fstours'
 import { useQuasar } from 'quasar'
+import { useRoute, useRouter } from 'vue-router'
 import LegForm from 'components/LegForm.vue'
 import TourForm from 'components/TourForm.vue'
 import AddTourForm from 'components/AddTourForm.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
+const route = useRoute()
+const router = useRouter()
 const tourOptions = computed(() => {
   return store.tours.map((tour) => ({
     label: tour.tour_description,
@@ -176,6 +199,12 @@ async function onTourSelected(tourId) {
   if (tourId) {
     try {
       store.setSelectedTour(tourId)
+
+      // Update URL without causing a full page reload
+      if (route.params.tourId !== tourId) {
+        router.push({ path: `/tour/${tourId}` })
+      }
+
       await store.fetchTourLegs(tourId)
       updateLastUpdated()
     } catch (err) {
@@ -188,6 +217,11 @@ async function onTourSelected(tourId) {
     // Handle clearing the selection
     store.setSelectedTour(null)
     store.clearLegs()
+
+    // Navigate back to home when no tour is selected
+    if (route.path !== '/') {
+      router.push('/')
+    }
   }
 }
 
@@ -197,6 +231,49 @@ function updateLastUpdated() {
   const minutes = now.getUTCMinutes().toString().padStart(2, '0')
   const seconds = now.getUTCSeconds().toString().padStart(2, '0')
   lastUpdated.value = `${hours}:${minutes}:${seconds}Z`
+}
+
+function toggleAdmin() {
+  if (store.isAdmin) {
+    // Logout admin
+    store.logoutAdmin()
+    $q.notify({
+      type: 'positive',
+      message: 'Logged out of admin mode',
+      position: 'top',
+      timeout: 2000,
+    })
+  } else {
+    // Show password prompt
+    $q.dialog({
+      title: 'Admin Authentication',
+      message: 'Enter admin password:',
+      prompt: {
+        model: '',
+        type: 'password',
+      },
+      cancel: true,
+      persistent: true,
+      dark: true,
+    }).onOk(async (password) => {
+      try {
+        await store.authenticateAdmin(password)
+        $q.notify({
+          type: 'positive',
+          message: 'Admin authentication successful',
+          position: 'top',
+          timeout: 2000,
+        })
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: err.message || 'Authentication failed',
+          position: 'top',
+          timeout: 3000,
+        })
+      }
+    })
+  }
 }
 
 async function refreshData() {
@@ -387,10 +464,63 @@ const confirmDeleteTour = () => {
   })
 }
 
+function shareCurrentTour() {
+  if (!store.selectedTour) return
+
+  const baseUrl = window.location.origin
+  const shareUrl = `${baseUrl}/#/tour/${store.selectedTour}`
+
+  // Copy to clipboard
+  navigator.clipboard
+    .writeText(shareUrl)
+    .then(() => {
+      $q.notify({
+        type: 'positive',
+        message: 'Tour URL copied to clipboard!',
+        position: 'top',
+        timeout: 2000,
+      })
+    })
+    .catch(() => {
+      // Fallback: show the URL in a dialog
+      $q.dialog({
+        title: 'Share Tour',
+        message: 'Copy this URL to share the current tour:',
+        prompt: {
+          model: shareUrl,
+          readonly: true,
+        },
+        ok: 'Close',
+        dark: true,
+      })
+    })
+}
+
 onMounted(async () => {
   try {
     await store.fetchTours()
     updateLastUpdated()
+
+    // Check if there's a tour parameter in the URL
+    const tourIdFromUrl = route.params.tourId
+    if (tourIdFromUrl) {
+      // Wait for tours to be loaded, then check if the tour exists
+      const tourExists = store.tours.some((tour) => tour.tour_id === tourIdFromUrl)
+      if (tourExists) {
+        // Auto-select the tour from URL parameter
+        store.setSelectedTour(tourIdFromUrl)
+        await store.fetchTourLegs(tourIdFromUrl)
+      } else {
+        // Tour doesn't exist, redirect to home and show error
+        router.push('/')
+        $q.notify({
+          type: 'negative',
+          message: `Tour "${tourIdFromUrl}" not found`,
+          position: 'top',
+          timeout: 3000,
+        })
+      }
+    }
   } catch (err) {
     $q.notify({
       type: 'negative',

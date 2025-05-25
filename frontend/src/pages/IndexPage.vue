@@ -1,6 +1,6 @@
 <template>
-  <q-page class="q-pa-none" style="height: 100vh; width: 100vw; overflow: hidden">
-    <LMap ref="map" style="height: 100vh; width: 100vw" :zoom="3" :center="[40, 27]">
+  <q-page class="q-pa-none map-container">
+    <LMap ref="map" class="full-map" :zoom="3" :center="[40, 27]" @ready="onMapReady">
       <LTileLayer
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         layer-type="base"
@@ -17,10 +17,15 @@
           :fill-opacity="0.9"
           :weight="2"
         >
-          <LTooltip permanent>
-            {{ leg.sequence }}. {{ leg.origin }} - {{ leg.origin_name }}
-          </LTooltip>
+          <LTooltip permanent> {{ leg.origin }} - {{ leg.origin_name }} </LTooltip>
         </LCircleMarker>
+
+        <!-- Origin ICAO Label - Only show at zoom level 7 and above -->
+        <LMarker
+          v-if="currentZoom >= 7"
+          :lat-lng="getLabelPosition(leg.origin_coords)"
+          :icon="createTextIcon(leg.origin)"
+        />
 
         <!-- Destination CircleMarker - Only rendered if it's not an origin of another leg -->
         <LCircleMarker
@@ -35,8 +40,16 @@
           <LTooltip permanent> {{ leg.destination }} - {{ leg.destination_name }} </LTooltip>
         </LCircleMarker>
 
+        <!-- Destination ICAO Label - Only rendered if it's not an origin of another leg and zoom level is 7+ -->
+        <LMarker
+          v-if="!isLocationAnOrigin(leg.destination_coords, index) && currentZoom >= 7"
+          :lat-lng="getLabelPosition(leg.destination_coords)"
+          :icon="createTextIcon(leg.destination)"
+        />
+
         <!-- Polyline connecting Origin and Destination -->
         <LPolyline
+          ref="polyline"
           :lat-lngs="[leg.origin_coords, leg.destination_coords]"
           :weight="3"
           color="#1f6eb8"
@@ -46,35 +59,26 @@
             bubblingMouseEvents: false,
             opacity: 0.9,
           }"
-        >
-        </LPolyline>
-
-        <!-- Sequence Number Arrow Marker at the midpoint of the polyline -->
-        <LMarker
-          :lat-lng="calculateMidpoint(leg.origin_coords, leg.destination_coords)"
-          :options="{
-            interactive: true,
-            zIndexOffset: 1000,
-            icon: createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords),
-          }"
+          @ready="(polylineRef) => addSequenceMarker(polylineRef, leg)"
         >
           <LPopup>
             <LegInfo
               :leg="leg"
               :loading="store.loading"
+              :isAdmin="store.isAdmin"
               @edit="openEditDialog"
               @delete="confirmDeleteLeg"
             />
           </LPopup>
-        </LMarker>
+        </LPolyline>
       </template>
     </LMap>
 
     <!-- No Tours Selected Message -->
     <div
       v-if="!store.selectedTour && !store.loading"
-      class="fixed-center z-max"
-      style="width: 400px"
+      class="fixed-center"
+      style="width: 400px; z-index: 1000"
     >
       <q-card flat bordered class="q-pa-md bg-dark text-white">
         <q-card-section>
@@ -86,10 +90,7 @@
     </div>
 
     <!-- Loading Overlay -->
-    <div
-      v-if="store.loading"
-      class="fixed-center bg-dark text-white q-pa-md rounded-borders shadow-4 z-max"
-    >
+    <div v-if="store.loading" class="fixed-center bg-dark text-white q-pa-md rounded-borders z-top">
       <q-spinner-dots color="primary" size="40px" />
       <div class="q-mt-sm text-center">{{ store.loading ? 'Processing...' : 'Loading...' }}</div>
     </div>
@@ -114,25 +115,80 @@ import {
   LMap,
   LTileLayer,
   LPolyline,
-  LMarker,
   LTooltip,
   LPopup,
   LCircleMarker,
+  LMarker,
 } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
 import { onMounted, ref, watch, reactive } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRoute } from 'vue-router'
 import LegForm from 'components/LegForm.vue'
 import LegInfo from 'components/LegInfo.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
+const route = useRoute()
 const map = ref(null)
+const currentZoom = ref(3) // Track current zoom level
+const sequenceMarkers = ref([]) // Track sequence markers for zoom-based visibility
 
-// Calculate the midpoint between two coordinates
-const calculateMidpoint = (coord1, coord2) => {
-  return [(coord1[0] + coord2[0]) / 2, (coord1[1] + coord2[1]) / 2]
+// Function to get label position based on zoom level
+const getLabelPosition = (coords) => {
+  // Calculate offset based on zoom level
+  // Higher zoom = smaller offset, lower zoom = larger offset
+  const baseOffset = 0.05 // Reduced from 0.1 to bring labels closer
+  const zoomFactor = Math.max(0.5, 6 - currentZoom.value) // Reduced factor range
+  const offset = baseOffset * zoomFactor
+
+  return [coords[0] + offset, coords[1] + offset]
+}
+
+// Handle map ready event
+const onMapReady = () => {
+  if (map.value && map.value.leafletObject) {
+    // Set initial zoom level
+    currentZoom.value = map.value.leafletObject.getZoom()
+
+    // Add zoom event listener
+    map.value.leafletObject.on('zoomend', () => {
+      currentZoom.value = map.value.leafletObject.getZoom()
+      updateSequenceMarkersVisibility()
+    })
+  }
+}
+
+// Function to update sequence markers visibility based on zoom level
+const updateSequenceMarkersVisibility = () => {
+  if (!map.value || !map.value.leafletObject) return
+
+  sequenceMarkers.value.forEach((marker) => {
+    if (currentZoom.value >= 7) {
+      // Show markers at zoom level 7 and above
+      if (!map.value.leafletObject.hasLayer(marker)) {
+        marker.addTo(map.value.leafletObject)
+      }
+    } else {
+      // Hide markers below zoom level 7
+      if (map.value.leafletObject.hasLayer(marker)) {
+        map.value.leafletObject.removeLayer(marker)
+      }
+    }
+  })
+}
+
+// Function to clear all sequence markers from map and array
+const clearSequenceMarkers = () => {
+  if (map.value && map.value.leafletObject) {
+    sequenceMarkers.value.forEach((marker) => {
+      if (map.value.leafletObject.hasLayer(marker)) {
+        map.value.leafletObject.removeLayer(marker)
+      }
+    })
+  }
+  sequenceMarkers.value = []
 }
 
 // Create a custom arrow icon for the sequence number and route direction
@@ -168,6 +224,16 @@ const calculateBearing = (start, end) => {
   return (bearing + 270) % 360
 }
 
+// Create a text icon for airport ICAO codes
+const createTextIcon = (icaoCode) => {
+  return new L.DivIcon({
+    html: `<div class='icao-label'>${icaoCode}</div>`,
+    className: 'icao-icon',
+    iconSize: [40, 20],
+    iconAnchor: [0, 0],
+  })
+}
+
 // Function to check if a location is an origin in any leg
 const isLocationAnOrigin = (coords, currentIndex) => {
   return store.legs.some(
@@ -176,6 +242,34 @@ const isLocationAnOrigin = (coords, currentIndex) => {
       leg.origin_coords[0] === coords[0] &&
       leg.origin_coords[1] === coords[1],
   )
+}
+
+// Function to add sequence marker using polyline center
+const addSequenceMarker = (polyline, leg) => {
+  if (!polyline || !leg) return
+
+  // Get the center point of the polyline
+  const center = polyline.getCenter()
+
+  // Create the marker at the polyline center
+  const marker = L.marker([center.lat, center.lng], {
+    icon: createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords),
+    interactive: true,
+    zIndexOffset: 1000,
+  })
+
+  // When marker is clicked, trigger the polyline popup
+  marker.on('click', () => {
+    polyline.openPopup()
+  })
+
+  // Store marker in the array for visibility management
+  sequenceMarkers.value.push(marker)
+
+  // Add marker to the map only if zoom level is appropriate
+  if (map.value && map.value.leafletObject && currentZoom.value >= 7) {
+    marker.addTo(map.value.leafletObject)
+  }
 }
 
 // Fix Leaflet's default icon paths
@@ -188,6 +282,13 @@ L.Icon.Default.mergeOptions({
 })
 
 onMounted(async () => {
+  // Check if there's a tour parameter in the URL and no tour is selected yet
+  const tourIdFromUrl = route.params.tourId
+  if (tourIdFromUrl && !store.selectedTour) {
+    // Set the tour from URL parameter (this will trigger the watcher)
+    store.setSelectedTour(tourIdFromUrl)
+  }
+
   // If a tour is already selected, fetch its legs
   if (store.selectedTour) {
     try {
@@ -216,6 +317,9 @@ watch(
   async (newTourId) => {
     if (newTourId) {
       try {
+        // Clear existing sequence markers from previous tour
+        clearSequenceMarkers()
+
         await store.fetchTourLegs(newTourId)
 
         // If legs are loaded and map is ready, zoom to the first leg
@@ -232,6 +336,9 @@ watch(
           message: `Error: ${err.message}`,
         })
       }
+    } else {
+      // If no tour selected, clear sequence markers
+      clearSequenceMarkers()
     }
   },
 )
@@ -346,6 +453,20 @@ const submitEditLeg = async () => {
 </script>
 
 <style scoped>
+/* Map container styling */
+.map-container {
+  position: relative;
+  height: calc(100vh - 100px); /* Subtract approximate header + footer height */
+  width: 100vw;
+  overflow: hidden;
+}
+
+.full-map {
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 400px;
+}
+
 /* Styling for sequence arrow markers */
 :deep(.sequence-icon) {
   background: none !important;
@@ -372,6 +493,25 @@ const submitEditLeg = async () => {
 :deep(.sequence-number) {
   display: inline-block;
   transform-origin: center;
+}
+
+/* Styling for ICAO code labels */
+:deep(.icao-icon) {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:deep(.icao-label) {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
 }
 
 /* Hide the default Leaflet popup wrapper */

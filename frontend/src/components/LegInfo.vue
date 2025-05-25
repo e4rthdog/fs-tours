@@ -3,7 +3,7 @@
     <q-card-section class="q-pa-sm bg-primary text-white">
       <div class="text-h6">
         <div class="text-h6">{{ leg.origin }} -> {{ leg.destination }}</div>
-        <div class="q-gutter-x-sm">
+        <div v-if="isAdmin" class="q-gutter-x-sm">
           <q-btn flat round dense icon="edit" title="Edit Leg" @click="$emit('edit', leg)" />
           <q-btn
             flat
@@ -95,6 +95,7 @@
 defineProps({
   leg: Object,
   loading: Boolean,
+  isAdmin: Boolean,
 })
 
 const formatDate = (dateString) => {

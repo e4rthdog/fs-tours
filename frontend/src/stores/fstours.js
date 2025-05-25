@@ -10,6 +10,8 @@ export const useFsToursStore = defineStore('fstours', () => {
   const selectedTour = ref(null)
   const loading = ref(false)
   const error = ref(null)
+  const isAdmin = ref(false)
+  const adminToken = ref('')
 
   async function fetchLegs() {
     loading.value = true
@@ -71,13 +73,8 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch(`${API_BASE_URL}/legs/${legId}`, {
+      const res = await makeAdminRequest(`${API_BASE_URL}/legs/${legId}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        mode: 'cors', // Explicitly specify CORS mode
       })
 
       if (!res.ok) {
@@ -98,12 +95,8 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch(`${API_BASE_URL}/legs/${leg.id}`, {
+      const res = await makeAdminRequest(`${API_BASE_URL}/legs/${leg.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
         body: JSON.stringify({
           id: leg.id,
           tour_id: leg.tour_id,
@@ -117,7 +110,6 @@ export const useFsToursStore = defineStore('fstours', () => {
           link3: leg.link3,
           flight_date: leg.flight_date,
         }),
-        mode: 'cors',
       })
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ message: 'Failed to update leg' }))
@@ -136,12 +128,8 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch(`${API_BASE_URL}/legs`, {
+      const res = await makeAdminRequest(`${API_BASE_URL}/legs`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
         body: JSON.stringify({
           tour_id: leg.tour_id,
           origin: leg.origin,
@@ -154,7 +142,6 @@ export const useFsToursStore = defineStore('fstours', () => {
           link3: leg.link3,
           flight_date: leg.flight_date,
         }),
-        mode: 'cors',
       })
 
       if (!res.ok) {
@@ -176,15 +163,11 @@ export const useFsToursStore = defineStore('fstours', () => {
     error.value = null
 
     try {
-      const res = await fetch(`${API_BASE_URL}/tours/${tour.tour_id}`, {
+      const res = await makeAdminRequest(`${API_BASE_URL}/tours/${tour.tour_id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           tour_description: tour.tour_description,
         }),
-        mode: 'cors',
       })
 
       if (!res.ok) {
@@ -206,16 +189,12 @@ export const useFsToursStore = defineStore('fstours', () => {
     error.value = null
 
     try {
-      const res = await fetch(`${API_BASE_URL}/tours`, {
+      const res = await makeAdminRequest(`${API_BASE_URL}/tours`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           tour_id: tour.tour_id,
           tour_description: tour.tour_description,
         }),
-        mode: 'cors',
       })
 
       if (!res.ok) {
@@ -237,13 +216,8 @@ export const useFsToursStore = defineStore('fstours', () => {
     error.value = null
 
     try {
-      const res = await fetch(`${API_BASE_URL}/tours/${tourId}`, {
+      const res = await makeAdminRequest(`${API_BASE_URL}/tours/${tourId}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        mode: 'cors',
       })
 
       if (!res.ok) {
@@ -291,12 +265,85 @@ export const useFsToursStore = defineStore('fstours', () => {
     }
   }
 
+  async function authenticateAdmin(password) {
+    loading.value = true
+    error.value = null
+    try {
+      // Store the password as token temporarily
+      const tempToken = password
+
+      // Test authentication by making a request with the token
+      const res = await fetch(`${API_BASE_URL}/tours`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${tempToken}`,
+        },
+        body: JSON.stringify({
+          tour_id: '__test__',
+          tour_description: 'test',
+        }),
+        mode: 'cors',
+      })
+
+      if (res.status === 401) {
+        throw new Error('Invalid password')
+      }
+
+      // If we get here, authentication was successful (even if tour creation failed for other reasons)
+      // Delete the test tour if it was created
+      if (res.ok) {
+        await fetch(`${API_BASE_URL}/tours/__test__`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${tempToken}`,
+          },
+          mode: 'cors',
+        })
+      }
+
+      isAdmin.value = true
+      adminToken.value = password
+      return { success: true, message: 'Authentication successful' }
+    } catch (err) {
+      error.value = err.message
+      isAdmin.value = false
+      adminToken.value = ''
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function logoutAdmin() {
+    isAdmin.value = false
+    adminToken.value = ''
+  }
+
+  // Helper function to make admin requests with authorization
+  function makeAdminRequest(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${adminToken.value}`,
+        ...options.headers,
+      },
+      mode: 'cors',
+    })
+  }
+
   return {
     legs,
     tours,
     selectedTour,
     loading,
     error,
+    isAdmin,
     fetchLegs,
     fetchTourLegs,
     fetchTours,
@@ -309,6 +356,8 @@ export const useFsToursStore = defineStore('fstours', () => {
     addTour,
     deleteTour,
     fetchSimbriefData,
+    authenticateAdmin,
+    logoutAdmin,
   }
 })
 

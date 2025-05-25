@@ -10,6 +10,10 @@ use THSCD\AeroFetch\Services\AircraftService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+// Load environment variables
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->load();
+
 $database = new Medoo([
   'type' => 'sqlite',
   'database' => __DIR__ . '/../db/fstours.db'
@@ -80,15 +84,29 @@ $app->options('/{routes:.+}', function (Request $request, Response $response) {
     ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 });
 
-// Authentication middleware
-$authMiddleware = function ($request, $handler) {
+// Admin authentication middleware
+$adminAuthMiddleware = function ($request, $handler) {
   $auth = $request->getHeaderLine('Authorization');
-  if (empty($auth) || $auth !== 'Bearer your-secret-token') {
+
+  if (empty($auth) || !str_starts_with($auth, 'Bearer ')) {
     $response = new \Slim\Psr7\Response();
-    $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
-    return $response
-      ->withStatus(401)
-      ->withHeader('Content-Type', 'application/json');
+    $response->getBody()->write(json_encode(['error' => 'Admin authentication required']));
+    return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+  }
+
+  $token = substr($auth, 7); // Remove 'Bearer ' prefix
+  $adminPassword = $_ENV['ADMIN_PASSWORD'] ?? null;
+
+  if (empty($adminPassword)) {
+    $response = new \Slim\Psr7\Response();
+    $response->getBody()->write(json_encode(['error' => 'Admin password not configured']));
+    return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+  }
+
+  if ($token !== $adminPassword) {
+    $response = new \Slim\Psr7\Response();
+    $response->getBody()->write(json_encode(['error' => 'Invalid admin credentials']));
+    return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
   }
 
   return $handler->handle($request);
@@ -151,7 +169,7 @@ $app->post('/tours', function (Request $request, Response $response, $args) use 
 
   $response->getBody()->write(json_encode(['success' => true, 'tour_id' => $data['tour_id']]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Update an existing tour
 $app->put('/tours/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -179,7 +197,7 @@ $app->put('/tours/{id}', function (Request $request, Response $response, $args) 
 
   $response->getBody()->write(json_encode(['success' => true]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Delete a tour
 $app->delete('/tours/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -200,7 +218,7 @@ $app->delete('/tours/{id}', function (Request $request, Response $response, $arg
 
   $response->getBody()->write(json_encode(['success' => true]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 
 // Get all legs for a specific tour
@@ -308,7 +326,7 @@ $app->post('/legs', function (Request $request, Response $response, $args) use (
 
   $response->getBody()->write(json_encode(['success' => true, 'id' => $database->id()]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Update an existing tour leg
 $app->put('/legs/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -351,7 +369,7 @@ $app->put('/legs/{id}', function (Request $request, Response $response, $args) u
   ]);
   $response->getBody()->write(json_encode(['success' => true]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 // Delete a tour leg by id
 $app->delete('/legs/{id}', function (Request $request, Response $response, $args) use ($database) {
@@ -368,6 +386,6 @@ $app->delete('/legs/{id}', function (Request $request, Response $response, $args
     'message' => 'Tour leg deleted successfully'
   ]));
   return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($adminAuthMiddleware);
 
 $app->run();

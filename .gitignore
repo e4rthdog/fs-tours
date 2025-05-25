@@ -9,6 +9,7 @@
 /api/db/*.sqlite
 /api/db/*.db
 !/api/db/.gitkeep
+/api/*.log
 
 # DDEV related
 /api/.ddev/.dbimageBuild
