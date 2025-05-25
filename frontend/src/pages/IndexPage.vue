@@ -17,9 +17,7 @@
           :fill-opacity="0.9"
           :weight="2"
         >
-          <LTooltip permanent>
-            {{ leg.sequence }}. {{ leg.origin }} - {{ leg.origin_name }}
-          </LTooltip>
+          <LTooltip permanent> {{ leg.origin }} - {{ leg.origin_name }} </LTooltip>
         </LCircleMarker>
 
         <!-- Destination CircleMarker - Only rendered if it's not an origin of another leg -->
