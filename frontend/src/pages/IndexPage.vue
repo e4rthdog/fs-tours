@@ -96,7 +96,7 @@
 
     <!-- Edit Leg Dialog -->
     <q-dialog v-model="editDialog.show" persistent dark>
-      <q-card style="min-width: 400px; max-width: 90vw">
+      <q-card flat style="min-width: 400px; max-width: 90vw">
         <LegForm
           v-model="editDialog.form"
           :loading="store.loading"
@@ -320,22 +320,7 @@ const submitEditLeg = async () => {
 }
 </script>
 
-<style>
-/* Override Leaflet popups to use dark theme */
-:deep(.leaflet-popup-content-wrapper) {
-  background-color: var(--q-dark) !important;
-  color: white !important;
-  border-radius: 4px !important;
-}
-
-:deep(.leaflet-popup-tip) {
-  background-color: var(--q-dark) !important;
-}
-
-:deep(.leaflet-popup-close-button) {
-  color: white !important;
-}
-
+<style scoped>
 /* Styling for sequence number markers */
 :deep(.sequence-icon) {
   background: none !important;
@@ -373,5 +358,45 @@ const submitEditLeg = async () => {
   color: #1f6eb8;
   font-weight: bold;
   line-height: 24px;
+}
+
+/* Hide the default Leaflet popup wrapper */
+:deep(.leaflet-popup-content-wrapper) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+:deep(.leaflet-popup-tip) {
+  display: none !important;
+}
+
+:deep(.leaflet-popup-content) {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* Style the close button for better visibility */
+:deep(.leaflet-popup-close-button) {
+  position: absolute !important;
+  top: 15px !important;
+  right: 12px !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  line-height: 18px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  z-index: 1000 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  transition: background-color 0.2s ease !important;
 }
 </style>
