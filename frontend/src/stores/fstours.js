@@ -1,6 +1,8 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { ref } from 'vue'
 
+const API_BASE_URL = 'http://fs-tours-api.ddev.site'
+
 export const useFsToursStore = defineStore('fstours', () => {
   const legs = ref([])
   const tours = ref([])
@@ -12,7 +14,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch('http://fs-tours-api.ddev.site/legs')
+      const res = await fetch(`${API_BASE_URL}/legs`)
       if (!res.ok) throw new Error('Failed to fetch legs')
       legs.value = await res.json()
     } catch (err) {
@@ -29,7 +31,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch(`http://fs-tours-api.ddev.site/tours/${tourId}/legs`)
+      const res = await fetch(`${API_BASE_URL}/tours/${tourId}/legs`)
       if (!res.ok) throw new Error(`Failed to fetch legs for tour ${tourId}`)
       const data = await res.json()
       legs.value = data
@@ -45,7 +47,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch('http://fs-tours-api.ddev.site/tours')
+      const res = await fetch(`${API_BASE_URL}/tours`)
       if (!res.ok) throw new Error('Failed to fetch tours')
       tours.value = await res.json()
     } catch (err) {
@@ -68,7 +70,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch(`http://fs-tours-api.ddev.site/legs/${legId}`, {
+      const res = await fetch(`${API_BASE_URL}/legs/${legId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +97,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch(`https://fs-tours-api.ddev.site/legs/${leg.id}`, {
+      const res = await fetch(`${API_BASE_URL}/legs/${leg.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +135,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await fetch('http://fs-tours-api.ddev.site/legs', {
+      const res = await fetch(`${API_BASE_URL}/legs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +175,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     error.value = null
 
     try {
-      const res = await fetch(`http://fs-tours-api.ddev.site/tours/${tour.tour_id}`, {
+      const res = await fetch(`${API_BASE_URL}/tours/${tour.tour_id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +205,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     error.value = null
 
     try {
-      const res = await fetch('http://fs-tours-api.ddev.site/tours', {
+      const res = await fetch(`${API_BASE_URL}/tours`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -234,7 +236,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     error.value = null
 
     try {
-      const res = await fetch(`http://fs-tours-api.ddev.site/tours/${tourId}`, {
+      const res = await fetch(`${API_BASE_URL}/tours/${tourId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
