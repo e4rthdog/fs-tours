@@ -129,6 +129,45 @@ export const useFsToursStore = defineStore('fstours', () => {
     }
   }
 
+  async function addLeg(leg) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await fetch('http://fs-tours-api.ddev.site/legs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          tour_id: leg.tour_id,
+          origin: leg.origin,
+          destination: leg.destination,
+          aircraft: leg.aircraft,
+          route: leg.route,
+          comments: leg.comments,
+          link1: leg.link1,
+          link2: leg.link2,
+          link3: leg.link3,
+          flight_date: leg.flight_date,
+        }),
+        mode: 'cors',
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Failed to add leg' }))
+        throw new Error(errorData.message || 'Failed to add leg')
+      }
+
+      return await res.json()
+    } catch (err) {
+      error.value = err.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     legs,
     tours,
@@ -142,6 +181,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     clearLegs,
     deleteLeg,
     updateLeg,
+    addLeg,
   }
 })
 

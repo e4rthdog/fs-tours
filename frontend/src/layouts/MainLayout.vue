@@ -51,6 +51,7 @@
             label="Add Leg"
             dense
             :disable="!store.selectedTour"
+            @click="openAddLegDialog"
           />
         </div>
       </q-toolbar>
@@ -66,13 +67,26 @@
         <div class="text-caption">Map last updated: {{ lastUpdated }}</div>
       </div>
     </q-footer>
+
+    <!-- Add Leg Dialog -->
+    <q-dialog v-model="addLegDialog.show" persistent dark>
+      <q-card style="min-width: 400px; max-width: 90vw">
+        <LegForm
+          v-model="addLegDialog.form"
+          :loading="store.loading"
+          @submit="submitAddLeg"
+          @cancel="addLegDialog.show = false"
+        />
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { useFsToursStore } from 'stores/fstours'
 import { useQuasar } from 'quasar'
+import LegForm from 'components/LegForm.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
@@ -84,6 +98,21 @@ const tourOptions = computed(() => {
 })
 
 const lastUpdated = ref('--:--:--Z')
+const addLegDialog = reactive({
+  show: false,
+  form: {
+    tour_id: '',
+    origin: '',
+    destination: '',
+    aircraft: '',
+    route: '',
+    comments: '',
+    link1: '',
+    link2: '',
+    link3: '',
+    flight_date: '',
+  },
+})
 
 async function onTourSelected(tourId) {
   if (tourId) {
@@ -125,6 +154,52 @@ async function refreshData() {
       type: 'negative',
       message: `Error refreshing tours: ${err.message}`,
     })
+  }
+}
+
+const openAddLegDialog = () => {
+  // Reset form with current tour ID
+  addLegDialog.form = {
+    tour_id: store.selectedTour || '',
+    origin: '',
+    destination: '',
+    aircraft: '',
+    route: '',
+    comments: '',
+    link1: '',
+    link2: '',
+    link3: '',
+    flight_date: '',
+  }
+  addLegDialog.show = true
+}
+
+const submitAddLeg = async () => {
+  try {
+    store.loading = true
+    await store.addLeg(addLegDialog.form)
+    addLegDialog.show = false
+
+    // Refresh tour legs after adding
+    if (store.selectedTour) {
+      await store.fetchTourLegs(store.selectedTour)
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: 'Leg added successfully',
+      position: 'top',
+      timeout: 2000,
+    })
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: err.message || 'Failed to add leg',
+      position: 'top',
+      timeout: 3000,
+    })
+  } finally {
+    store.loading = false
   }
 }
 
