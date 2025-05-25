@@ -5,6 +5,18 @@
     </div>
   </q-card-section>
   <q-card-section class="q-gutter-md">
+    <!-- SimBrief Integration -->
+    <div class="row q-gutter-sm q-mb-md">
+      <q-btn
+        color="secondary"
+        icon="flight"
+        label="Import from SimBrief"
+        @click="importFromSimBrief"
+        :loading="simbriefLoading"
+        no-caps
+      />
+    </div>
+
     <q-input v-model="form.origin" label="Origin ICAO" dense outlined required />
     <q-input v-model="form.destination" label="Destination ICAO" dense outlined required />
     <q-input v-model="form.aircraft" label="Aircraft ICAO" dense outlined />
@@ -35,12 +47,18 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, watch, ref } from 'vue'
+import { Notify } from 'quasar'
+import { useFsToursStore } from '../stores/fstours'
+
 const props = defineProps({
   modelValue: Object,
   loading: Boolean,
 })
 const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
+
+const store = useFsToursStore()
+const simbriefLoading = ref(false)
 
 const form = reactive({
   tour_id: '',
@@ -70,6 +88,52 @@ watch(
   },
   { deep: true },
 )
+
+async function importFromSimBrief() {
+  simbriefLoading.value = true
+
+  try {
+    const simbriefData = await store.fetchSimbriefData()
+
+    // Map SimBrief data to form fields
+    form.origin = simbriefData.origin
+    form.destination = simbriefData.destination
+    form.aircraft = simbriefData.aircraft
+    form.route = simbriefData.route
+
+    // Add SimBrief link to first link field if empty
+    if (!form.link1 && simbriefData.link) {
+      form.link1 = simbriefData.link
+    }
+
+    // Add flight info to comments if empty
+    if (!form.comments) {
+      const flightInfo = []
+      if (simbriefData.flightInfo.blockTime)
+        flightInfo.push(`Block time: ${simbriefData.flightInfo.blockTime}`)
+      if (simbriefData.flightInfo.fuel) flightInfo.push(`Fuel: ${simbriefData.flightInfo.fuel} lbs`)
+      if (simbriefData.flightInfo.aircraftName)
+        flightInfo.push(`Aircraft: ${simbriefData.flightInfo.aircraftName}`)
+
+      if (flightInfo.length > 0) {
+        form.comments = `SimBrief import: ${flightInfo.join(', ')}`
+      }
+    }
+
+    Notify.create({
+      type: 'positive',
+      message: 'SimBrief data imported successfully!',
+    })
+  } catch (error) {
+    console.error('SimBrief import error:', error)
+    Notify.create({
+      type: 'negative',
+      message: error.message,
+    })
+  } finally {
+    simbriefLoading.value = false
+  }
+}
 
 function onSubmit() {
   emit('submit')

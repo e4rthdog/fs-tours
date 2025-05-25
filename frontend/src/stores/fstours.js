@@ -257,6 +257,44 @@ export const useFsToursStore = defineStore('fstours', () => {
     }
   }
 
+  async function fetchSimbriefData() {
+    const username = 'earthdog'
+
+    try {
+      const response = await fetch(
+        `https://www.simbrief.com/api/xml.fetcher.php?username=${username}&json=1`,
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch SimBrief data')
+      }
+
+      const data = await response.json()
+
+      // Check if the response contains flight plan data
+      if (!data.origin || !data.destination) {
+        throw new Error('No valid flight plan found for this username')
+      }
+
+      return {
+        origin: data.origin.icao_code || '',
+        destination: data.destination.icao_code || '',
+        aircraft: data.aircraft.icao_code || '',
+        route: data.atc?.route || '',
+        link: data.params?.request_id
+          ? `https://www.simbrief.com/ofp/flightplans/pdf/${data.params.request_id}.pdf`
+          : '',
+        flightInfo: {
+          blockTime: data.times?.est_block || '',
+          fuel: data.fuel?.plan_ramp || '',
+          aircraftName: data.aircraft?.name || '',
+        },
+      }
+    } catch (error) {
+      throw new Error(`SimBrief import failed: ${error.message}`)
+    }
+  }
+
   return {
     legs,
     tours,
@@ -274,6 +312,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     updateTour,
     addTour,
     deleteTour,
+    fetchSimbriefData,
   }
 })
 
