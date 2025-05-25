@@ -198,6 +198,37 @@ export const useFsToursStore = defineStore('fstours', () => {
     }
   }
 
+  const addTour = async (tour) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const res = await fetch('http://fs-tours-api.ddev.site/tours', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tour_id: tour.tour_id,
+          tour_description: tour.tour_description,
+        }),
+        mode: 'cors',
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Failed to create tour' }))
+        throw new Error(errorData.message || 'Failed to create tour')
+      }
+
+      return await res.json()
+    } catch (err) {
+      error.value = err.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     legs,
     tours,
@@ -213,6 +244,7 @@ export const useFsToursStore = defineStore('fstours', () => {
     updateLeg,
     addLeg,
     updateTour,
+    addTour,
   }
 })
 

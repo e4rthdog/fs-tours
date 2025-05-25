@@ -128,8 +128,9 @@ $app->get('/tours[/{id}]', function (Request $request, Response $response, $args
 
 // Create a new tour
 $app->post('/tours', function (Request $request, Response $response, $args) use ($database) {
-  $data = $request->getParsedBody();
-
+  $body = $request->getBody()->getContents();
+  $data = json_decode($body, true);
+  error_log("Received data: " . print_r($data, true));
   // Validate required fields
   if (empty($data['tour_id']) || empty($data['tour_description'])) {
     $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
@@ -144,8 +145,8 @@ $app->post('/tours', function (Request $request, Response $response, $args) use 
   }
 
   $database->insert('tours', [
-    'tour-id' => $data['tour_id'],
-    'tour-description' => $data['tour_description']
+    'tour_id' => $data['tour_id'],
+    'tour_description' => $data['tour_description']
   ]);
 
   $response->getBody()->write(json_encode(['success' => true, 'tour_id' => $data['tour_id']]));

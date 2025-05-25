@@ -39,7 +39,7 @@
         <div class="q-ml-lg row items-center tour-actions-group">
           <span class="text-body1 q-mr-sm">Tour actions:</span>
           <q-btn-group flat>
-            <q-btn flat round dense icon="add" title="Create Tour" />
+            <q-btn flat round dense icon="add" title="Create Tour" @click="openAddTourDialog" />
             <q-btn
               flat
               round
@@ -99,6 +99,18 @@
         />
       </q-card>
     </q-dialog>
+
+    <!-- Add Tour Dialog -->
+    <q-dialog v-model="addTourDialog.show" persistent dark>
+      <q-card style="min-width: 400px; max-width: 90vw">
+        <AddTourForm
+          v-model="addTourDialog.form"
+          :loading="store.loading"
+          @submit="submitAddTour"
+          @cancel="addTourDialog.show = false"
+        />
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
@@ -108,6 +120,7 @@ import { useFsToursStore } from 'stores/fstours'
 import { useQuasar } from 'quasar'
 import LegForm from 'components/LegForm.vue'
 import TourForm from 'components/TourForm.vue'
+import AddTourForm from 'components/AddTourForm.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
@@ -136,6 +149,14 @@ const addLegDialog = reactive({
 })
 
 const editTourDialog = reactive({
+  show: false,
+  form: {
+    tour_id: '',
+    tour_description: '',
+  },
+})
+
+const addTourDialog = reactive({
   show: false,
   form: {
     tour_id: '',
@@ -262,6 +283,41 @@ const submitEditTour = async () => {
     $q.notify({
       type: 'negative',
       message: err.message || 'Failed to update tour',
+      position: 'top',
+      timeout: 3000,
+    })
+  } finally {
+    store.loading = false
+  }
+}
+
+const openAddTourDialog = () => {
+  addTourDialog.form = {
+    tour_id: '',
+    tour_description: '',
+  }
+  addTourDialog.show = true
+}
+
+const submitAddTour = async () => {
+  try {
+    store.loading = true
+    await store.addTour(addTourDialog.form)
+    addTourDialog.show = false
+
+    // Refresh tours after adding
+    await store.fetchTours()
+
+    $q.notify({
+      type: 'positive',
+      message: 'Tour added successfully',
+      position: 'top',
+      timeout: 2000,
+    })
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: err.message || 'Failed to add tour',
       position: 'top',
       timeout: 3000,
     })
