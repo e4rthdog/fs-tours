@@ -12,8 +12,8 @@ Personal Flight Simulator tour viewer with interactive world map.
 
 ## Tech Stack
 
-- **Backend**: PHP (Slim + Medoo) with SQLite
-- **Frontend**: Vue 3 + Quasar + Pinia
+- **Backend**: PHP (Slim, Medoo)
+- **Frontend**: Vue 3 (Composition API, official Vue Router, Pinia, Quasar, no TypeScript)
 - **Data**: [AeroFetch](https://github.com/tiagohillebrandt/aerofetch) for airport/aircraft enrichment
 
 ## Quick Setup
