@@ -60,15 +60,6 @@
             opacity: 0.9,
           }"
         >
-          <LPopup>
-            <LegInfo
-              :leg="leg"
-              :loading="store.loading"
-              :isAdmin="store.isAdmin"
-              @edit="openEditDialog"
-              @delete="confirmDeleteLeg"
-            />
-          </LPopup>
         </LPolyline>
 
         <!-- Sequence Marker at polyline center -->
@@ -105,7 +96,7 @@
     <q-dialog v-model="legInfoDialog.show" dark>
       <q-card flat style="min-width: 400px; max-width: 90vw">
         <LegInfo
-          :leg="legInfoDialog.leg"
+          :leg="currentLeg"
           :loading="store.loading"
           :isAdmin="store.isAdmin"
           @edit="openEditDialogFromInfo"
@@ -136,13 +127,12 @@ import {
   LTileLayer,
   LPolyline,
   LTooltip,
-  LPopup,
   LCircleMarker,
   LMarker,
 } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import { useFsToursStore } from 'stores/fstours'
-import { onMounted, ref, watch, reactive } from 'vue'
+import { onMounted, ref, watch, reactive, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
 import LegForm from 'components/LegForm.vue'
@@ -153,6 +143,9 @@ const $q = useQuasar()
 const route = useRoute()
 const map = ref(null)
 const currentZoom = ref(3) // Track current zoom level
+const currentLeg = computed(() =>
+  legInfoDialog.legId ? store.legs.find((l) => l.id === legInfoDialog.legId) : null,
+)
 
 // Configurable zoom level threshold for showing labels and sequence markers
 const ZOOM_THRESHOLD = 6
@@ -238,7 +231,7 @@ const getPolylineCenter = (startCoords, endCoords) => {
 
 // Function to open leg popup programmatically
 const openLegPopup = (leg) => {
-  legInfoDialog.leg = leg
+  legInfoDialog.legId = leg.id
   legInfoDialog.show = true
 }
 
