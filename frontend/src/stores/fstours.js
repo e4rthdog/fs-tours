@@ -13,21 +13,6 @@ export const useFsToursStore = defineStore('fstours', () => {
   const isAdmin = ref(false)
   const adminToken = ref('')
 
-  async function fetchLegs() {
-    loading.value = true
-    error.value = null
-    try {
-      const res = await fetch(`${API_BASE_URL}/legs`)
-      if (!res.ok) throw new Error('Failed to fetch legs')
-      legs.value = await res.json()
-    } catch (err) {
-      error.value = err.message
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
   async function fetchTourLegs(tourId) {
     if (!tourId) return
 
@@ -355,7 +340,6 @@ export const useFsToursStore = defineStore('fstours', () => {
     loading,
     error,
     isAdmin,
-    fetchLegs,
     fetchTourLegs,
     fetchTours,
     setSelectedTour,
