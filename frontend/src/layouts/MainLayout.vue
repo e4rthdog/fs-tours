@@ -2,12 +2,12 @@
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-dark text-white">
       <!-- Desktop layout -->
-      <q-toolbar class="gt-sm row items-center">
+      <q-toolbar class="gt-sm row items-center no-wrap">
         <HeaderElements show-logo-title />
-        <q-space />
-        <HeaderElements show-select />
+        <HeaderElements show-select select-style="min-width: 200px; margin: 0 16px" />
         <HeaderElements show-buttons />
         <HeaderElements
+          v-if="store.isAdmin"
           show-admin-actions
           admin-actions-class="q-ml-lg row items-center tour-actions-group"
         />
