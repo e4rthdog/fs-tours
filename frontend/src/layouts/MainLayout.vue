@@ -1,96 +1,40 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-dark text-white">
-      <q-toolbar>
-        <q-avatar square size="32px" class="q-mr-md">
-          <img src="icons/fs-tours.png" alt="Logo" />
-        </q-avatar>
-        <q-toolbar-title shrink class="q-mx-lg">FS Tours</q-toolbar-title>
-        <q-select
-          v-model="store.selectedTour"
-          :options="tourOptions"
-          option-value="value"
-          option-label="label"
-          label="Select Tour"
-          dense
-          outlined
-          style="min-width: 200px"
-          :loading="store.loading"
-          @update:model-value="onTourSelected"
-          emit-value
-          map-options
-        >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">No tours found</q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-        <q-btn
-          flat
-          round
-          dense
-          icon="refresh"
-          class="q-ml-sm"
-          :loading="store.loading"
-          @click="refreshData"
-          title="Refresh tours data"
+      <!-- Desktop layout -->
+      <q-toolbar class="gt-sm row items-center">
+        <HeaderElements show-logo-title />
+        <q-space />
+        <HeaderElements show-select />
+        <HeaderElements show-buttons />
+        <HeaderElements
+          show-admin-actions
+          admin-actions-class="q-ml-lg row items-center tour-actions-group"
         />
-        <q-btn
-          flat
-          round
-          dense
-          icon="share"
-          class="q-ml-sm"
-          :disable="!store.selectedTour"
-          @click="shareCurrentTour"
-          title="Share current tour"
-        />
-        <q-btn
-          flat
-          round
-          dense
-          :icon="store.isAdmin ? 'admin_panel_settings' : 'lock'"
-          :color="store.isAdmin ? 'positive' : 'grey'"
-          class="q-ml-sm"
-          @click="toggleAdmin"
-          :title="store.isAdmin ? 'Admin Mode (Click to logout)' : 'Admin Login'"
-        />
-        <div v-if="store.isAdmin" class="q-ml-lg row items-center tour-actions-group">
-          <span class="text-body1 q-mr-sm">Tour actions:</span>
-          <q-btn-group flat>
-            <q-btn flat round dense icon="add" title="Create Tour" @click="openAddTourDialog" />
-            <q-btn
-              flat
-              round
-              dense
-              icon="edit"
-              title="Edit Tour"
-              :disable="!store.selectedTour"
-              @click="openEditTourDialog"
-            />
-            <q-btn
-              flat
-              round
-              dense
-              icon="delete"
-              title="Delete Tour"
-              :disable="!store.selectedTour"
-              @click="confirmDeleteTour"
-            />
-          </q-btn-group>
-          <q-separator vertical spaced class="q-mx-md" />
-          <q-btn
-            class="q-px-md"
-            color="primary"
-            icon="add"
-            label="Add Leg"
-            dense
-            :disable="!store.selectedTour"
-            @click="openAddLegDialog"
-          />
-        </div>
       </q-toolbar>
+
+      <!-- Mobile layout -->
+      <div class="lt-md">
+        <!-- Row 1: Logo and Title -->
+        <q-toolbar class="q-py-xs">
+          <HeaderElements show-logo-title />
+        </q-toolbar>
+
+        <!-- Row 2: Select and buttons -->
+        <q-toolbar class="q-py-xs">
+          <HeaderElements show-select select-style="min-width: 200px; flex-grow: 1" />
+          <HeaderElements show-buttons />
+        </q-toolbar>
+
+        <!-- Row 3: Admin actions -->
+        <q-toolbar v-if="store.isAdmin" class="q-py-xs">
+          <HeaderElements
+            show-admin-actions
+            admin-actions-class="row items-center full-width"
+            is-mobile
+          />
+        </q-toolbar>
+      </div>
     </q-header>
 
     <q-page-container>
@@ -143,13 +87,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, reactive } from 'vue'
+import { ref, onMounted, computed, reactive, provide } from 'vue'
 import { useFsToursStore } from 'stores/fstours'
 import { useQuasar } from 'quasar'
 import { useRoute, useRouter } from 'vue-router'
 import LegForm from 'components/LegForm.vue'
 import TourForm from 'components/TourForm.vue'
 import AddTourForm from 'components/AddTourForm.vue'
+import HeaderElements from 'components/HeaderElements.vue'
 
 const store = useFsToursStore()
 const $q = useQuasar()
@@ -524,6 +469,20 @@ onMounted(async () => {
       message: `Error loading tours: ${err.message}`,
     })
   }
+})
+
+// Provide methods to child components
+provide('headerMethods', {
+  store,
+  tourOptions,
+  onTourSelected,
+  refreshData,
+  shareCurrentTour,
+  toggleAdmin,
+  openAddTourDialog,
+  openEditTourDialog,
+  confirmDeleteTour,
+  openAddLegDialog,
 })
 </script>
 
