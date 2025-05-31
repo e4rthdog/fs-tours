@@ -56,21 +56,18 @@
     <q-input v-model="form.link1" label="Link 1" dense outlined />
     <q-input v-model="form.link2" label="Link 2" dense outlined />
     <q-input v-model="form.link3" label="Link 3" dense outlined />
-    <div class="column">
-      <label class="text-subtitle2 q-mb-xs">Flight Date *</label>
-      <q-date
-        v-model="form.flight_date"
-        mask="YYYY-MM-DD"
-        dense
-        flat
-        bordered
-        outlined
-        minimal
-        landscape
-        class="q-mt-sm"
-        :rules="[(val) => (val && val.length > 0) || 'Flight date is required']"
-      />
-    </div>
+    <q-input
+      v-model="displayDate"
+      label="Flight Date *"
+      dense
+      outlined
+      mask="##/##/####"
+      placeholder="DD/MM/YYYY"
+      :rules="[
+        (val) => (val && val.length > 0) || 'Flight date is required',
+        (val) => isValidDate(val) || 'Please enter a valid date (DD/MM/YYYY)',
+      ]"
+    />
   </q-card-section>
   <q-card-actions align="right">
     <q-btn flat label="Cancel" class="bg-negative" @click="$emit('cancel')" :disable="loading" />
@@ -95,6 +92,31 @@ const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 
 const store = useFsToursStore()
 const simbriefLoading = ref(false)
+const displayDate = ref('')
+
+// Date validation function
+const isValidDate = (dateStr) => {
+  if (!dateStr || dateStr.length !== 10) return false
+
+  const [day, month, year] = dateStr.split('/')
+  const date = new Date(year, month - 1, day)
+
+  return date.getFullYear() == year && date.getMonth() == month - 1 && date.getDate() == day
+}
+
+// Convert YYYY-MM-DD to DD/MM/YYYY for display
+const formatDateForDisplay = (isoDate) => {
+  if (!isoDate) return ''
+  const [year, month, day] = isoDate.split('-')
+  return `${day}/${month}/${year}`
+}
+
+// Convert DD/MM/YYYY to YYYY-MM-DD for backend
+const formatDateForBackend = (displayDate) => {
+  if (!displayDate || !isValidDate(displayDate)) return ''
+  const [day, month, year] = displayDate.split('/')
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+}
 
 const form = reactive({
   tour_id: '',
@@ -112,7 +134,11 @@ const form = reactive({
 watch(
   () => props.modelValue,
   (val) => {
-    if (val) Object.assign(form, val)
+    if (val) {
+      Object.assign(form, val)
+      // Convert backend date format to display format
+      displayDate.value = formatDateForDisplay(val.flight_date)
+    }
   },
   { immediate: true },
 )
@@ -124,6 +150,11 @@ watch(
   },
   { deep: true },
 )
+
+// Watch displayDate changes and convert to backend format
+watch(displayDate, (newDisplayDate) => {
+  form.flight_date = formatDateForBackend(newDisplayDate)
+})
 
 async function importFromSimBrief() {
   simbriefLoading.value = true
