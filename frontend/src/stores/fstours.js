@@ -268,18 +268,14 @@ export const useFsToursStore = defineStore('fstours', () => {
       // Store the password as token temporarily
       const tempToken = password
 
-      // Test authentication by making a request with the token
-      const res = await fetch(`${API_BASE_URL}/tours`, {
+      // Test authentication using dedicated auth endpoint
+      const res = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
           Authorization: `Bearer ${tempToken}`,
         },
-        body: JSON.stringify({
-          tour_id: '__test__',
-          tour_description: 'test',
-        }),
         mode: 'cors',
       })
 
@@ -287,18 +283,8 @@ export const useFsToursStore = defineStore('fstours', () => {
         throw new Error('Invalid password')
       }
 
-      // If we get here, authentication was successful (even if tour creation failed for other reasons)
-      // Delete the test tour if it was created
-      if (res.ok) {
-        await fetch(`${API_BASE_URL}/tours/__test__`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            Authorization: `Bearer ${tempToken}`,
-          },
-          mode: 'cors',
-        })
+      if (!res.ok) {
+        throw new Error('Authentication failed')
       }
 
       isAdmin.value = true
