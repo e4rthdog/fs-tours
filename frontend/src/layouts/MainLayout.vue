@@ -43,7 +43,7 @@
 
     <q-footer class="bg-dark text-white">
       <div class="q-pa-sm q-gutter-sm row items-center justify-between">
-        <div>FS Tours &copy; {{ new Date().getFullYear() }}</div>
+        <div>FS Tours &copy; {{ new Date().getFullYear() }} - {{ APP_VERSION }}</div>
         <div class="text-caption">Map last updated: {{ lastUpdated }}</div>
       </div>
     </q-footer>
@@ -95,6 +95,7 @@ import LegForm from 'components/LegForm.vue'
 import TourForm from 'components/TourForm.vue'
 import AddTourForm from 'components/AddTourForm.vue'
 import HeaderElements from 'components/HeaderElements.vue'
+import { APP_VERSION } from '/src/version.js'
 
 const store = useFsToursStore()
 const $q = useQuasar()
