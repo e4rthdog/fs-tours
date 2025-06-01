@@ -254,7 +254,7 @@ export const useFsToursStore = defineStore('fstours', () => {
         aircraft: data.aircraft.icao_code || '',
         route: data.general?.route || '',
         comments: comments,
-        link: data.params?.request_id ? data.files?.directory + data.files.pdf?.link : '',
+        link: '',
       }
     } catch (error) {
       throw new Error(`SimBrief import failed: ${error.message}`)
