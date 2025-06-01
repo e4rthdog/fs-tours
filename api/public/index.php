@@ -123,6 +123,12 @@ $app->get('/', function (Request $request, Response $response, $args) {
   return $response;
 });
 
+// Add auth verification endpoint
+$app->post('/auth/verify', function (Request $request, Response $response, $args) {
+  $response->getBody()->write(json_encode(['success' => true, 'message' => 'Authentication successful']));
+  return $response->withHeader('Content-Type', 'application/json');
+})->add($adminAuthMiddleware);
+
 //
 // TOURS CODE
 // Get all tours or a specific one by tour-id
