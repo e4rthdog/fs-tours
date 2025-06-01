@@ -34,3 +34,4 @@ yarn-error.log*
 
 # Configuration files (copy from .example and customize)
 src/config/config.js
+src/version.js
