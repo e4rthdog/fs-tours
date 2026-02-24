@@ -65,7 +65,7 @@
         <!-- Sequence Marker at polyline center -->
         <LMarker
           :lat-lng="getPolylineCenter(leg.origin_coords, leg.destination_coords)"
-          :icon="createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords)"
+          :icon="createSequenceIcon(leg.sequence, leg.origin_coords, leg.destination_coords, leg)"
           @click="openLegPopup(leg)"
         />
       </template>
@@ -170,12 +170,16 @@ const onMapReady = () => {
 }
 
 // Create a custom arrow icon for the sequence number and route direction
-const createSequenceIcon = (sequence, originCoords, destCoords) => {
+const createSequenceIcon = (sequence, originCoords, destCoords, leg) => {
   // Calculate the bearing/heading from origin to destination
   const bearing = calculateBearing(originCoords, destCoords)
 
+  // Check if leg has at least one link filled
+  const hasLinks = leg.link1 || leg.link2 || leg.link3
+  const backgroundColor = hasLinks ? '#4caf50' : 'var(--q-secondary)'
+
   return new L.DivIcon({
-    html: `<div class='sequence-arrow' style='transform: rotate(${bearing}deg)'>
+    html: `<div class='sequence-arrow' style='transform: rotate(${bearing}deg); background: ${backgroundColor}'>
              <span class='sequence-number' style='transform: rotate(${-bearing}deg)'>${sequence}</span>
            </div>`,
     className: 'sequence-icon',
@@ -455,7 +459,6 @@ const submitEditLeg = async () => {
   justify-content: center;
   width: 40px;
   height: 20px;
-  background: var(--q-secondary);
   color: white;
   font-weight: bold;
   font-size: 12px;
