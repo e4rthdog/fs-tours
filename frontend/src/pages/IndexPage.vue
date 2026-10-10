@@ -2,10 +2,10 @@
   <q-page class="q-pa-none map-container">
     <LMap ref="map" class="full-map" :zoom="3" :center="[40, 27]" @ready="onMapReady">
       <LTileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        :url="tileUrl"
         layer-type="base"
-        name="OpenStreetMap"
-        attribution="&copy; OpenStreetMap contributors"
+        name="CARTO Dark"
+        attribution="&copy; OpenStreetMap contributors, &copy; CARTO"
       />
       <template v-for="(leg, index) in store.legs" :key="leg.id + '-' + leg.sequence">
         <!-- Origin CircleMarker -->
@@ -137,6 +137,9 @@ import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
 import LegForm from 'components/LegForm.vue'
 import LegInfo from 'components/LegInfo.vue'
+import { config } from '../config/config.js'
+
+const tileUrl = `https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=${config.cartoApiKey}`
 
 const store = useFsToursStore()
 const $q = useQuasar()

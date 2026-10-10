@@ -13,4 +13,7 @@ export const config = {
 
   // SimBrief Username - Your SimBrief account username
   simbriefUsername: 'your-username-here',
+
+  // CARTO Basemaps API key - required for the map tiles (carto.com/basemaps/apikey)
+  cartoApiKey: 'your-carto-api-key',
 }

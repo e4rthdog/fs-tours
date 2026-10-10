@@ -21,7 +21,7 @@ cp .env.example .env              # set ADMIN_PASSWORD
 
 # Frontend
 cd frontend && npm install
-cp src/config/config.example.js src/config/config.js   # set apiBaseUrl and simbriefUsername
+cp src/config/config.example.js src/config/config.js   # set apiBaseUrl, simbriefUsername and cartoApiKey
 npm run dev
 ```
 
