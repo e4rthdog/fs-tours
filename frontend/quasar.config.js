@@ -1,7 +1,7 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-import { defineConfig } from '#q-app/wrappers'
+import { defineConfig } from '#q-app'
 
 export default defineConfig((/* ctx */) => {
   return {
@@ -34,8 +34,8 @@ export default defineConfig((/* ctx */) => {
     build: {
       publicPath: '/fs-tours/',
       target: {
-        browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
-        node: 'node20',
+        browser: ['es2022', 'firefox123', 'chrome121', 'safari17.2'],
+        node: 'node22',
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

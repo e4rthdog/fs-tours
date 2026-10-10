@@ -257,7 +257,7 @@ export const useFsToursStore = defineStore('fstours', () => {
         link: '',
       }
     } catch (error) {
-      throw new Error(`SimBrief import failed: ${error.message}`)
+      throw new Error(`SimBrief import failed: ${error.message}`, { cause: error })
     }
   }
 
