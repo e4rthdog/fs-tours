@@ -131,12 +131,12 @@ import {
   LMarker,
 } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
-import { useFsToursStore } from 'stores/fstours'
+import { useFsToursStore } from '@/stores/fstours'
 import { onMounted, ref, watch, reactive, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
-import LegForm from 'components/LegForm.vue'
-import LegInfo from 'components/LegInfo.vue'
+import LegForm from '@/components/LegForm.vue'
+import LegInfo from '@/components/LegInfo.vue'
 import { config } from '../config/config.js'
 
 const tileUrl = `https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=${config.cartoApiKey}`

@@ -88,13 +88,13 @@
 
 <script setup>
 import { ref, onMounted, computed, reactive, provide } from 'vue'
-import { useFsToursStore } from 'stores/fstours'
+import { useFsToursStore } from '@/stores/fstours'
 import { useQuasar } from 'quasar'
 import { useRoute, useRouter } from 'vue-router'
-import LegForm from 'components/LegForm.vue'
-import TourForm from 'components/TourForm.vue'
-import AddTourForm from 'components/AddTourForm.vue'
-import HeaderElements from 'components/HeaderElements.vue'
+import LegForm from '@/components/LegForm.vue'
+import TourForm from '@/components/TourForm.vue'
+import AddTourForm from '@/components/AddTourForm.vue'
+import HeaderElements from '@/components/HeaderElements.vue'
 import { APP_VERSION } from '/src/version.js'
 
 const store = useFsToursStore()
